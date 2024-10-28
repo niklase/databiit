@@ -4,14 +4,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.zuunr</groupId>
-		<artifactId>os-parent</artifactId>
+		<artifactId>databiit-parent</artifactId>
 		<version>1.0-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
+		<relativePath>../parent/pom.xml</relativePath>
 	</parent>
 
-	<groupId>com.zuunr</groupId>
 	<artifactId>json-servlet-example</artifactId>
-	<version>0.1.0-SNAPSHOT</version>
+	<version>${databiit}</version>
 	<name>json-servlet-example</name>
 	<description>Demo project for Spring Boot</description>
 	<packaging>jar</packaging>
@@ -43,6 +42,10 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-core</artifactId>
+		</dependency>
 
 		<!--
 		<dependency>
@@ -55,20 +58,14 @@
 		<dependency>
 			<groupId>com.zuunr</groupId>
 			<artifactId>json</artifactId>
-			<version>0.1.1.M2-dc30f9d</version>
+			<version>0.1.1.M4-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.zuunr</groupId>
 			<artifactId>openapi</artifactId>
-			<version>0.1.0-MTEST</version>
-		</dependency>
-		<dependency>
-			<groupId>com.zuunr</groupId>
-			<artifactId>json</artifactId>
-			<scope>compile</scope>
 		</dependency>
 
-	</dependencies>
+    </dependencies>
 
 	<build>
 		<plugins>

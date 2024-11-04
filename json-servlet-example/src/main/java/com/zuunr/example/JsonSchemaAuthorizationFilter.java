@@ -1,5 +1,7 @@
 package com.zuunr.example;
 
+import com.zuunr.api.openapi.OAS3Deserializer;
+import com.zuunr.http.RequestUtil;
 import com.zuunr.json.JsonArray;
 import com.zuunr.json.JsonObject;
 import com.zuunr.json.JsonValue;
@@ -19,13 +21,18 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
-public class JsonFilter extends OncePerRequestFilter {
+public class JsonSchemaAuthorizationFilter extends OncePerRequestFilter {
+
+    private static final JsonObject DEFAULT_OAS_DESER_OP = JsonObject.EMPTY
+            .put("requestBody", JsonObject.EMPTY.put("content", JsonObject.EMPTY.put("application/json", JsonObject.EMPTY.put("schema", JsonObject.EMPTY))))
+            .put("parameters", JsonArray.EMPTY);
 
     private PermissionSchemaProvider permissionSchemaProvider;
     private RequestAccessController requestAccessController;
 
-    public JsonFilter(
+    public JsonSchemaAuthorizationFilter(
             @Autowired PermissionSchemaProvider permissionSchemaProvider,
             @Autowired RequestAccessController requestAccessController
     ) {
@@ -39,8 +46,30 @@ public class JsonFilter extends OncePerRequestFilter {
         CachedBodyRequestWrapper requestWrapper = new CachedBodyRequestWrapper(servletRequest);
         CachedBodyResponseWrapper responseWrapper = new CachedBodyResponseWrapper(servletResponse);
 
+        JsonObject request = RequestUtil.createRequest(servletRequest);
+
+        JsonObject exchange = JsonObject.EMPTY.put("request", request); // TODO: MAke sure deserilalization is done from servlet reqeust directly
+
+        InputStream inputStream;
+
+        //try {
+            inputStream = requestWrapper.getInputStream();
+        // } catch (Exception ioException) {
+        //    inputStream = null;
+        // }
+
+        exchange = OAS3Deserializer.deserializeRequest(exchange, inputStream, DEFAULT_OAS_DESER_OP);
+
+        if (exchange.get("errors") != null) {
+            servletResponse.setStatus(400);
+            servletResponse.getWriter().write(exchange.asJson());
+            return;
+        }
+
+        exchange = exchange.put("request", request.putAll(exchange.get("request").getJsonObject()));
+
         try {
-            JsonObject authorizedExchangeModel = getAuthorizedExchangeModel(requestWrapper);
+            JsonObject authorizedExchangeModel = requestAccessController.getAuthorizedExchange(exchange);
             filterChain.doFilter(
                     requestWrapper,
                     responseWrapper
@@ -82,9 +111,6 @@ public class JsonFilter extends OncePerRequestFilter {
         }
     }
 
-    private JsonObject getAuthorizedExchangeModel(CachedBodyRequestWrapper requestWrapper) throws AuthenticationException, AuthorizationException {
-        return requestAccessController.getAuthorizedExchange(requestWrapper);
-    }
 
     private JsonObject filterResponse(JsonObject exchange, CachedBodyResponseWrapper responseWrapper, JsonSchema responseSchema) {
         JsonValue responseBody = JsonValueFactory.create(new String(responseWrapper.getDataStream()));

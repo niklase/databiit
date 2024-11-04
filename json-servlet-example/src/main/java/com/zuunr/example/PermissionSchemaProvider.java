@@ -57,7 +57,6 @@ public class PermissionSchemaProvider {
                                 JsonValue schema = JsonValueFactory.create(resource.getInputStream());
                                 permissionSchemas = permissionSchemas.put(JsonArray.of(urlPath, method, permissionName, requestOrResponse), schema);
 
-
                                 String permissionConfKey = permissionConfKeyOf(method, requestOrResponse, permissionName);
                                 List<PathPatternPermissionConfig> list = permissionConfByMethodAndPathPattern.get(permissionConfKey);
                                 list = list == null ? new ArrayList<>() : list;

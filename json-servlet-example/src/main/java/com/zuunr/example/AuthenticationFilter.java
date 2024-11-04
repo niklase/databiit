@@ -25,6 +25,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         try {
             Authentication authentication = AuthenticationService.getAuthentication((HttpServletRequest) request);
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            filterChain.doFilter(request, response);
         } catch (Exception exp) {
             HttpServletResponse httpResponse = (HttpServletResponse) response;
             httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -35,6 +36,5 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             writer.close();
         }
 
-        filterChain.doFilter(request, response);
     }
 }

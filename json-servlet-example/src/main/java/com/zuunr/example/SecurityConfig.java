@@ -23,7 +23,7 @@ public class SecurityConfig {
                 //.httpBasic(Customizer.withDefaults())
                 //.sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(new AuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(new JsonFilter(permissionSchemaProvider, new RequestAccessController(permissionSchemaProvider)), AuthenticationFilter.class)
+                .addFilterAfter(new JsonSchemaAuthorizationFilter(permissionSchemaProvider, new RequestAccessController(permissionSchemaProvider)), AuthenticationFilter.class)
         ;
         return http.build();
     }

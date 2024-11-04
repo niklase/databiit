@@ -22,7 +22,7 @@ public class CachedBodyRequestWrapper extends HttpServletRequestWrapper {
     }
 
     @Override
-    public ServletInputStream getInputStream() {
+    public ServletInputStream getInputStream()  {
         return new ServletInputStreamWrapper(cachedBody);
     }
 

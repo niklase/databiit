@@ -63,7 +63,6 @@
                 <artifactId>openapi</artifactId>
                 <version>${databiit}</version>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 

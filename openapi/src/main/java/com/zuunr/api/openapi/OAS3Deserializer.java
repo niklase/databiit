@@ -11,7 +11,7 @@ import com.zuunr.json.util.ApiErrorException;
 import com.zuunr.json.util.StringSplitter;
 import org.springframework.http.MediaType;
 
-
+import java.io.InputStream;
 import java.net.URI;
 
 public class OAS3Deserializer {
@@ -25,13 +25,15 @@ public class OAS3Deserializer {
     private static final JsonValue NUMBER_PATTERN = JsonValue.of("^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$"); // Should be dynamically fetched from JsonSchemaForJsonSchema?
     private static final JsonValue INTEGER_PATTERN = JsonValue.of("^-?(?:0|[1-9]\\d*)(?:\\d+)?(?:[eE][+-]?\\d+)?$"); // Should be dynamically fetched from JsonSchemaForJsonSchema?
 
-
-    public static JsonObject deserializeRequest(JsonObject exchangeWithRequest, JsonObject openApiOperationObject) {
+    public static JsonObject deserializeRequest(JsonObject exchangeWithRequestAndBody, JsonObject openApiOperationObject) {
+        return deserializeRequest(exchangeWithRequestAndBody, null, openApiOperationObject);
+    }
+    public static JsonObject deserializeRequest(JsonObject exchangeWithRequest, InputStream requestBodyInputStream, JsonObject openApiOperationObject) {
 
         JsonValue errors;
         JsonValue body;
-        JsonObject request = JsonObject.EMPTY;
-
+        final JsonObject request = exchangeWithRequest.get("request").getJsonObject();
+        JsonObject deserializedReq = JsonObject.EMPTY;
         try {
             JsonValue parametersSpec = openApiOperationObject.get("parameters");
             if (parametersSpec == null) {
@@ -39,31 +41,58 @@ public class OAS3Deserializer {
                 JsonValue query = exchangeWithRequest.get("request").get("uri").as(JsonUri.class).getQuery();
                 JsonObject requestWithQuery = JsonObject.EMPTY.put("query", query);
 
-                request = request.put(
+                deserializedReq = deserializedReq.put(
                         "query",
                         parseQueryStringToMultiValueJsonObject("query", JsonObject.EMPTY.put("request", requestWithQuery)));
             } else {
-                request = deserializeParameters(exchangeWithRequest, openApiOperationObject);
+                deserializedReq = deserializedReq.putAll(deserializeParameters(exchangeWithRequest, openApiOperationObject));
             }
 
             body = deserializeRequestBody(
+                    requestBodyInputStream,
                     exchangeWithRequest,
                     openApiOperationObject.get("requestBody", JsonObject.EMPTY).getJsonObject())
                     .get("request", JsonObject.EMPTY).get("body");
+
             errors = null;
         } catch (ApiErrorException apiErrorException) {
             errors = apiErrorException.errors;
             body = null;
         }
 
-        JsonObject parsedRequest = request;
+        deserializedReq = body == null ? deserializedReq : deserializedReq.put("body", body);
 
-        parsedRequest = body == null ? parsedRequest : parsedRequest.put("body", body);
-
-        JsonObject result = errors == null ? JsonObject.EMPTY.put("request", parsedRequest) : JsonObject.EMPTY;
-        result = errors == null ? result.put("ok", JsonValue.TRUE) : result.put("errors", errors).put("ok", JsonValue.FALSE);
-
+        JsonObject result = errors == null ? JsonObject.EMPTY.put("request", deserializedReq) : JsonObject.EMPTY;
+        result = errors == null
+                ? result.put("ok", JsonValue.TRUE)
+                : result.put("errors", errors).put("ok", JsonValue.FALSE);
         return result;
+    }
+
+    public static JsonObject deserializeRequestBody(InputStream requestBodyInputStream, JsonObject exchangeWithoutRequestBody, JsonObject openApiRequestBodySpec) {
+
+        JsonObject errorResult;
+
+        JsonObject openApiRequestBodyContent = openApiRequestBodySpec.get("content", JsonObject.EMPTY).getJsonObject();
+
+        JsonValue contentTypeJsonValue = exchangeWithoutRequestBody.get("request", JsonObject.EMPTY).get("headers", JsonObject.EMPTY).get("content-type", JsonArray.EMPTY).get(0);
+        MediaType contentTypeHeader = contentTypeJsonValue == null ? null : MediaType.parseMediaType(contentTypeJsonValue.getString());
+
+        //JsonValue bodyString = exchangeWithoutRequestBody.get("request", JsonObject.EMPTY).get("body");
+
+        if (requestBodyInputStream == null && exchangeWithoutRequestBody.get("request", JsonObject.EMPTY).get("body") == null) {   // TODO: Verify thatinput stream is really null when there is no body
+            if (openApiRequestBodySpec.get("required", JsonValue.FALSE).getBoolean()) {
+                throw createApiErrorExceptionMissingBody(exchangeWithoutRequestBody);
+            } else {
+                return exchangeWithoutRequestBody;
+            }
+        } else if (MediaType.APPLICATION_JSON.isCompatibleWith(contentTypeHeader)) {
+            return deserializeApplicationJson(requestBodyInputStream, exchangeWithoutRequestBody, openApiRequestBodyContent);
+        } else if (MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(contentTypeHeader)) {
+            return deserializeApplicationFormUrlencoded(exchangeWithoutRequestBody, openApiRequestBodyContent);
+        } else {
+            throw createApiErrorExceptionForUnsupportedContentType(exchangeWithoutRequestBody, openApiRequestBodyContent);
+        }
     }
 
     public static JsonObject deserializeRequestBody(JsonObject exchangeWithRequest, JsonObject openApiRequestBodySpec) {
@@ -214,6 +243,40 @@ public class OAS3Deserializer {
         return bodyModel;
     }
 
+    private static JsonObject deserializeApplicationJson(InputStream requestBodyInputStream, JsonObject exchangeWithRequest, JsonObject openApiRequestBodyContent) {
+        JsonValue schemaOfBody = openApiRequestBodyContent
+                .get(MediaType.APPLICATION_JSON_VALUE, JsonObject.EMPTY)
+                .get("schema");
+
+        if (schemaOfBody == null) {
+            throw createApiErrorExceptionForUnsupportedContentType(exchangeWithRequest, openApiRequestBodyContent);
+        } else {
+            JsonValue bodyModel;
+            try {
+
+                bodyModel = exchangeWithRequest.get("request", JsonObject.EMPTY).get("body");
+
+                if (bodyModel != null) {
+                    bodyModel = JsonValueFactory.create(bodyModel.getString());
+                }
+                if (bodyModel == null) {
+                    bodyModel = JsonValueFactory.create(requestBodyInputStream);
+                }
+            } catch (Exception e) {
+                throw createApiErrorExceptionForBadJsonBody(JsonObject.EMPTY.put("request", JsonObject.EMPTY.put("body", "MUST BE JSON!")));
+            }
+
+            JsonValue finalRequestSchema = JsonObject.EMPTY
+                    .put(Keywords.PROPERTIES, JsonObject.EMPTY
+                            .put("request", JsonObject.EMPTY
+                                    .put("properties", JsonObject.EMPTY
+                                            .put("body", schemaOfBody)))).jsonValue();
+            JsonObject finalRequestModel = JsonObject.EMPTY.put("request", JsonObject.EMPTY.put("body", bodyModel));
+            validateRequestModel(finalRequestModel, finalRequestSchema);
+            return finalRequestModel;
+        }
+    }
+
     private static JsonObject deserializeApplicationJson(JsonObject exchangeWithRequest, JsonObject openApiRequestBodyContent) {
         JsonValue schemaOfBody = openApiRequestBodyContent
                 .get(MediaType.APPLICATION_JSON_VALUE, JsonObject.EMPTY)
@@ -253,10 +316,7 @@ public class OAS3Deserializer {
                 .put("properties", JsonObject.EMPTY
                         .put("request", JsonObject.EMPTY
                                 .put("properties", JsonObject.EMPTY
-                                        .put("body", JsonObject.EMPTY
-                                                .put("format", "json")
-                                                .put("const", "\"Must be JSON\"")
-                                                .put("description", "Body must be of media type: application/json")
+                                        .put("body", false
                                         )))).as(JsonSchema.class);
         JsonObject validationResult = VALIDATOR.validate(
                 instance,
@@ -265,8 +325,10 @@ public class OAS3Deserializer {
 
         JsonValue apiError = API_ERROR_CREATOR.createErrors(validationResult, instance, schema);
         apiError = apiError
+                .put(JsonArray.of("/request/body", "violations", "/properties/request/properties/body/description"), "Body must be of media type: application/json")
                 .put(JsonArray.of("/request/body", "violations", "/properties/request/properties/body/format"), "json")
-                .remove(JsonArray.of("/request/body", "violations", "/properties/request/properties/body/const"));
+                .remove(JsonArray.of("/request/body", "rejectedValue"))
+                .remove(JsonArray.of("/request/body", "violations", "/properties/request/properties/body"));
 
         return new ApiErrorException(apiError);
     }

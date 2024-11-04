@@ -15,8 +15,9 @@ public class Controller {
     public ResponseEntity<JsonValue> post(@RequestBody JsonValue body, HttpServletResponse response) {
         return ResponseEntity.ok(body);
 
-    }@PostMapping(value = "/test/{id}", consumes = "application/json", produces = "application/json")
+    }
 
+    @PostMapping(value = "/test/{id}", consumes = "application/json", produces = "application/json")
     public ResponseEntity<JsonValue> postWithId(@RequestBody JsonValue body, HttpServletResponse response) {
         return ResponseEntity.ok(body);
     }

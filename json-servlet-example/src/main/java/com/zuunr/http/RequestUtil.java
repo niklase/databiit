@@ -16,13 +16,22 @@ public class RequestUtil {
         JsonObjectBuilder request = JsonObject.EMPTY.builder();
         JsonObject headers = createHeaders(serverHttpRequest);
         request.put("headers", headers);
-        request.put("uri", serverHttpRequest.getRequestURI());
-        request.put("method", serverHttpRequest.getMethod());
 
+        String path  = serverHttpRequest.getRequestURI();
+        String queryString = serverHttpRequest.getQueryString();
+        String uri = queryString == null || "".equals(queryString) ? path :  path + "?" + queryString;
+
+        request.put("uri", uri);
+        request.put("method", serverHttpRequest.getMethod());
+        request.put("path", path);
+
+        /*
         JsonValue body = createBody(serverHttpRequest.getHeader("content-type"), serverHttpRequest);
         if (body != null) {
             request.put("body", body);
         }
+
+         */
         return request.build();
     }
 

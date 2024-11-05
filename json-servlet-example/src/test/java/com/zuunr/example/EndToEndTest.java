@@ -2,7 +2,6 @@ package com.zuunr.example;
 
 import com.zuunr.json.JsonObject;
 import com.zuunr.json.JsonValue;
-import com.zuunr.json.JsonValueFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,12 +37,12 @@ public class EndToEndTest {
                 .put("hidden_in_response", "I do not show!")
                 .jsonValue();
 
-        HttpEntity<JsonValue> httpEntity = new HttpEntity<JsonValue>(body, httpHeaders);
+        HttpEntity<JsonValue> httpEntity = new HttpEntity<>(body, httpHeaders);
         ResponseEntity<JsonValue> response = restTemplate.exchange(URI.create(url), HttpMethod.POST, httpEntity, ParameterizedTypeReference.forType(JsonValue.class));
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody()).isEqualTo(JsonObject.EMPTY.put("hello","you").jsonValue());
+        assertThat(response.getBody()).isEqualTo(JsonObject.EMPTY.put("hello", "you").jsonValue());
     }
 }
 

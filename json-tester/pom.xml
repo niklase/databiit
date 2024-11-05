@@ -16,13 +16,14 @@
     </parent>
 
     <groupId>com.zuunr</groupId>
-    <artifactId>openapi</artifactId>
+    <artifactId>json-tester</artifactId>
     <version>${databiit}</version>
 
     <packaging>jar</packaging>
 
-    <name>openapi</name>
-    <description>OpenAPI related funtionality</description>
+    <name>json-tester</name>
+    <description>Generates OpenAPI documents from information models specified as JSON Schemas</description>
+    <url>https://bitbucket.org/zuunr/api-runtime</url>
     <organization>
         <name>Zuunr AB</name>
         <url>https://www.zuunr.com</url>
@@ -39,39 +40,25 @@
             <email>robot@zuunr.com</email>
         </developer>
     </developers>
+    <scm>
+        <connection>scm:git:git://bitbucket.org/zuunr/openapi-generator.git</connection>
+        <developerConnection>scm:git:ssh://bitbucket.org:zuunr/openapi-generator.git</developerConnection>
+        <url>https://bitbucket.org/zuunr/openapi-generator/src</url>
+    </scm>
+
     <properties>
         <revision>SNAPSHOT</revision>
         <graalvm.version>22.2.0</graalvm.version>
     </properties>
+
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/io.github.vzhn/netty-http-authenticator -->
         <dependency>
             <groupId>com.zuunr</groupId>
             <artifactId>json</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.zuunr</groupId>
-            <artifactId>json-tester</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-resolver-dns-native-macos</artifactId>
-            <version>4.1.80.Final</version>
-            <classifier>osx-aarch_64</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest</artifactId>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

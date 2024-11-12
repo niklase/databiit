@@ -5,7 +5,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-					  http://maven.apache.org/xsd/maven-4.0.0.xsd">
+                      http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -15,9 +15,9 @@
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
-    <groupId>com.zuunr</groupId>
+
     <artifactId>json-tester</artifactId>
-    <version>${databiit}</version>
+    <version>0.1.0-SNAPSHOT</version>
 
     <packaging>jar</packaging>
 
@@ -49,6 +49,8 @@
     <properties>
         <revision>SNAPSHOT</revision>
         <graalvm.version>22.2.0</graalvm.version>
+        <junit.version>5.10.3</junit.version>
+        <junit.platform.version>1.10.3</junit.platform.version>
     </properties>
 
     <dependencies>
@@ -59,6 +61,28 @@
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest</artifactId>
+            <version>2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <scope>test</scope>
+            <version>${junit.platform.version}</version>
         </dependency>
     </dependencies>
 </project>

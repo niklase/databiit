@@ -1,9 +1,0 @@
-module com.zuunr.api.openapi.test {
-    requires com.zuunr.json;
-    requires com.zuunr.jsontester;
-    requires spring.web;
-    requires org.hamcrest;
-    requires org.junit.jupiter.api;
-    requires com.zuunr.api.openapi;
-    opens com.zuunr.api.openapi to com.zuunr.json, org.junit.platform.commons, org.junit.jupiter.api;
-}

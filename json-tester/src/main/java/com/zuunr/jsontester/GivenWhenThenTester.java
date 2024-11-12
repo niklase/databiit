@@ -5,8 +5,9 @@ import com.zuunr.json.JsonObjectFactory;
 import com.zuunr.json.JsonObjectMerger;
 import com.zuunr.json.JsonValue;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 abstract public class GivenWhenThenTester {
 
@@ -23,7 +24,7 @@ abstract public class GivenWhenThenTester {
         JsonValue then = testCase.get("then");
 
         if (testCase.get("exactMatch", true).getBoolean()) {
-            assertThat(methodName, result, is(then));
+            assertEquals(result, then, methodName);
         } else {
             JsonObject thenToBeMerged = JsonObject.EMPTY.put("mergeMe", then); // {"a":[{"b":1},{"c":2}]}
             JsonObject resultToBeMerged = JsonObject.EMPTY.put("mergeMe", result); // {"a":[{"c":2}]}
@@ -31,9 +32,9 @@ abstract public class GivenWhenThenTester {
             JsonObject resultMergedByThen = jsonObjectMerger.merge(resultToBeMerged, thenToBeMerged);
 
             if (!resultMergedByThen.get("mergeMe").equals(result)) {
-                assertThat(result, is(then));
+                assertEquals(result, then);
             }
-            assertThat(thenMergedByResult.get("mergeMe"), is(resultMergedByThen.get("mergeMe")));
+            assertEquals(thenMergedByResult.get("mergeMe"), resultMergedByThen.get("mergeMe"));
         }
     }
 

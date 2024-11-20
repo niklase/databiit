@@ -1,9 +1,0 @@
-module com.zuunr.jsontester {
-    requires com.zuunr.json;
-    requires org.junit.jupiter.api;
-    requires org.junit.jupiter.params;
-
-    exports com.zuunr.jsontester to org.junit.platform.commons;
-
-    opens com.zuunr.jsontester to org.junit.platform.commons;
-}

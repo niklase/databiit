@@ -58,7 +58,11 @@
 		<dependency>
 			<groupId>com.zuunr</groupId>
 			<artifactId>json</artifactId>
-			<version>0.1.1.M4-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.zuunr</groupId>
+			<artifactId>json-tester</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.zuunr</groupId>

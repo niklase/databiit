@@ -1,7 +1,0 @@
-module com.example.test {
-    requires com.zuunr.jsontester;
-    requires org.junit.jupiter.api;
-    requires org.junit.jupiter.params;
-
-    opens com.example.test to org.junit.platform.commons;
-}

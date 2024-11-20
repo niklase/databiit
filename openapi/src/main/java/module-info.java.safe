@@ -1,8 +1,0 @@
-module com.zuunr.api.openapi {
-    requires com.zuunr.json;
-    requires spring.web;
-    requires json.tester;
-    exports com.zuunr.api.http;
-    exports com.zuunr.api.openapi;
-    opens com.zuunr.jsontester to org.junit.platform.commons, org.junit.jupiter.api;
-}

@@ -59,6 +59,14 @@
                     </compilerArgs>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>3.2.5</version>
+                <configuration>
+                    <argLine>--add-exports=java.base/sun.nio.ch=ALL-UNNAMED --patch-module ${project.artifactId}=${project.build.testOutputDirectory}</argLine>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <dependencies>
@@ -70,7 +78,7 @@
         <dependency>
             <groupId>com.zuunr</groupId>
             <artifactId>json-tester</artifactId>
-
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>

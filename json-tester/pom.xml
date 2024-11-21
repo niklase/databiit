@@ -72,13 +72,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency><dependency>
             <groupId>com.zuunr</groupId>
             <artifactId>json</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest</artifactId>
-            <version>2.2</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

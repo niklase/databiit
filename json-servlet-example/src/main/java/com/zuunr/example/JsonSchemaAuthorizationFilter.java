@@ -62,6 +62,7 @@ public class JsonSchemaAuthorizationFilter extends OncePerRequestFilter {
 
         if (exchange.get("errors") != null) {
             servletResponse.setStatus(400);
+            servletResponse.setContentType("application/json");
             servletResponse.getWriter().write(exchange.asJson());
             return;
         }

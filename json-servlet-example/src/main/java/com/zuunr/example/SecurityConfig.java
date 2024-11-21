@@ -13,18 +13,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(
-            HttpSecurity http,
-            PermissionSchemaProvider permissionSchemaProvider
-
-    ) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, PermissionSchemaProvider permissionSchemaProvider) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry -> authorizationManagerRequestMatcherRegistry.requestMatchers("/**").authenticated())
-                //.httpBasic(Customizer.withDefaults())
-                //.sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(new AuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(new JsonSchemaAuthorizationFilter(permissionSchemaProvider, new RequestAccessController(permissionSchemaProvider)), AuthenticationFilter.class)
-        ;
+                .addFilterAfter(new JsonSchemaAuthorizationFilter(permissionSchemaProvider, new RequestAccessController(permissionSchemaProvider)), AuthenticationFilter.class);
         return http.build();
     }
 

@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class ApiTester extends GivenWhenThenTesterBase {
+public class ApiTest extends GivenWhenThenTesterBase {
 
     @LocalServerPort
     private int port;
@@ -35,29 +35,6 @@ public class ApiTester extends GivenWhenThenTesterBase {
     static Stream<Path> testFiles() throws Exception {
         return testFiles((Class<? extends GivenWhenThenTesterBase>) new Object() {
         }.getClass().getEnclosingClass()); // NOSONAR
-    }
-
-
-    //@Test
-    public void shouldReturnExpectedData_whenEndpointIsCalled() {
-        String url = "http://localhost:" + port + "/test";
-
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("content-type", "application/json");
-        httpHeaders.add("accept", "application/json");
-        httpHeaders.add("x-api-key", "apisecret");
-
-        JsonValue body = JsonObject.EMPTY
-                .put("hello", "you")
-                .put("hidden_in_response", "I do not show!")
-                .jsonValue();
-
-        HttpEntity<JsonValue> httpEntity = new HttpEntity<>(body, httpHeaders);
-        ResponseEntity<JsonValue> response = restTemplate.exchange(URI.create(url), HttpMethod.POST, httpEntity, ParameterizedTypeReference.forType(JsonValue.class));
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody()).isEqualTo(JsonObject.EMPTY.put("hello", "you").jsonValue());
     }
 
     /*

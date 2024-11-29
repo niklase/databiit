@@ -12,7 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public class RequestAccessController {
 
     private static final JsonSchemaValidator JSON_SCHEMA_VALIDATOR = new JsonSchemaValidator();
-    private PermissionSchemaProvider permissionSchemaProvider;
+    private final PermissionSchemaProvider permissionSchemaProvider;
 
     public RequestAccessController(PermissionSchemaProvider permissionSchemaProvider) {
         this.permissionSchemaProvider = permissionSchemaProvider;
@@ -30,10 +30,10 @@ public class RequestAccessController {
             JsonValue requestSchema = permissionSchemaProvider.getRequestPermissionSchema(
                     request.get("path").getString(),
                     request.get("method").getString(),
-                    authority.getAuthority() //authentication.getAuthorities();
+                    authority.getAuthority()
             );
             validationResult = JSON_SCHEMA_VALIDATOR.validate(exchange.jsonValue(), requestSchema.as(JsonSchema.class), OutputStructure.DETAILED);
-            if (validationResult.get("valid").getBoolean()) {
+            if (JsonValue.TRUE.equals(validationResult.get("valid"))) {
                 return exchange;
             }
         }

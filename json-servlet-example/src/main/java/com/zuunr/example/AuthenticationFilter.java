@@ -1,5 +1,6 @@
 package com.zuunr.example;
 
+import com.zuunr.json.JsonObject;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,7 +32,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             httpResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
             PrintWriter writer = httpResponse.getWriter();
-            writer.print(exp.getMessage());
+            writer.print(JsonObject.EMPTY.put("message", exp.getMessage()).asJson());
             writer.flush();
             writer.close();
         }

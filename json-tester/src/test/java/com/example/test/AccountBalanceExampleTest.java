@@ -1,18 +1,21 @@
 package com.example.test;
 
+import com.zuunr.json.JsonNumber;
+import com.zuunr.json.JsonObject;
 import com.zuunr.json.JsonValue;
 import com.zuunr.jsontester.GivenWhenThenTesterBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
 /**
  * Both the
  */
-class ExampleOfLogicalOrTest extends GivenWhenThenTesterBase {
+class AccountBalanceExampleTest extends GivenWhenThenTesterBase {
 
     /*
      * This method implementation may be copied as-is to any other subclass of GivenWhenThenBaseTester
@@ -33,6 +36,13 @@ class ExampleOfLogicalOrTest extends GivenWhenThenTesterBase {
 
     @Override
     public JsonValue doGivenWhen(JsonValue given, JsonValue when) {
-        return JsonValue.of(given.getBoolean() | when.getBoolean());
+
+        // Perform the test (typically calling the method to be tested)
+        BigDecimal balance = given.get("balance", 0).getJsonNumber().asBigDecimal();
+        BigDecimal withdrawal = when.get("withdrawal").getJsonNumber().asBigDecimal();
+        BigDecimal resultingBalance = balance.subtract(withdrawal);
+
+        // Return result (i.e "then" in given-when-then) as com.zuunr.json.JsonValue
+        return JsonObject.EMPTY.put("balance", resultingBalance).jsonValue();
     }
 }

@@ -14,17 +14,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.*;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.DefaultResponseErrorHandler;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.ResponseErrorHandler;
 
-import java.net.URI;
+import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class ApiTest extends GivenWhenThenTesterBase {
+class ApiTest extends GivenWhenThenTesterBase {
 
     @LocalServerPort
     private int port;
@@ -56,8 +62,18 @@ public class ApiTest extends GivenWhenThenTesterBase {
         RequestEntity<JsonValue> requestEntity = bodyBuilder.body(request.getBody());
 
 
-        ResponseEntity<JsonValue> responseEntity = restTemplate.exchange(requestEntity, JsonValue.class);
-        return ResponseUtil.createResponse(responseEntity).jsonValue();
+        try {
+            ResponseErrorHandler responseErrorHandler = new DefaultResponseErrorHandler();
+            restTemplate.getRestTemplate().setErrorHandler(responseErrorHandler);
+            ResponseEntity<JsonValue> responseEntity = restTemplate.exchange(requestEntity, JsonValue.class);
+            return ResponseUtil.createResponse(responseEntity).jsonValue();
+        } catch (HttpClientErrorException e) {
+            ResponseEntity<JsonValue> responseEntity = ResponseEntity.status(e.getStatusCode().value()).headers(e.getResponseHeaders()).body(e.getResponseBodyAs(JsonValue.class));
+            return ResponseUtil.createResponse(responseEntity).jsonValue();
+        } catch (Exception e) {
+            System.out.println("e.message: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
     private HttpHeaders getHeaders(JsonObject jsonRequest) {

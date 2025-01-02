@@ -1,10 +1,16 @@
 package com.zuunr.jsontester;
 
-import com.zuunr.json.*;
+import com.zuunr.json.JsonObject;
+import com.zuunr.json.JsonObjectMerger;
+import com.zuunr.json.JsonValue;
+import com.zuunr.json.JsonValueFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,25 +21,26 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public abstract class GivenWhenThenTesterBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GivenWhenThenTesterBase.class);
+    private static final String MERGE_ME = "mergeMe";
 
     private static final JsonObjectMerger JSON_OBJECT_MERGER = new JsonObjectMerger();
-    private static URI TEST_FOLDER_URI;
+    private static URI testFolderUri;
 
-    static protected URI getTestFolder() {
-        return TEST_FOLDER_URI;
+    protected static URI getTestFolder() {
+        return testFolderUri;
     }
 
-    static protected Stream<Path> testFiles(Class<? extends GivenWhenThenTesterBase> testClass) throws Exception {
+    protected static Stream<Path> testFiles(Class<? extends GivenWhenThenTesterBase> testClass) throws IOException, URISyntaxException {
 
-        TEST_FOLDER_URI = testClass.getResource(testClass.getSimpleName()).toURI();
-        return Files.list(Paths.get(TEST_FOLDER_URI))
+        testFolderUri = testClass.getResource(testClass.getSimpleName()).toURI();
+        return Files.list(Paths.get(testFolderUri))
                 .filter(path -> path.toString().endsWith(".json")).map(Path::getFileName);
     }
 
-    protected final void executeTest(Path jsonFileName) throws Exception {
+    protected final void executeTest(Path jsonFileName) throws IOException {
         // Read JSON content (or parse, validate, etc.)
-        Path testFilePath = Path.of(TEST_FOLDER_URI.getPath()+"/"+jsonFileName.toString());
-        LOGGER.info("file:" + testFilePath);
+        Path testFilePath = Path.of(testFolderUri.getPath() + File.separatorChar + jsonFileName.toString());
+        LOGGER.info("file {}", testFilePath);
         String jsonContent = Files.readString(testFilePath);
 
         // Call the method you want to test, passing the JSON content
@@ -44,21 +51,21 @@ public abstract class GivenWhenThenTesterBase {
         JsonValue result = doGivenWhen(testCase.get("given"), testCase.get("when"));
         JsonValue then = testCase.get("then");
 
-        if (testCase.get("meta", JsonObject.EMPTY).get("additionalPropertiesAllowed", false).getBoolean()) {
-            JsonObject thenToBeMerged = JsonObject.EMPTY.put("mergeMe", then); // {"a":[{"b":1},{"c":2}]}
-            JsonObject resultToBeMerged = JsonObject.EMPTY.put("mergeMe", result); // {"a":[{"c":2}]}
+        if (Boolean.TRUE == testCase.get("meta", JsonObject.EMPTY).get("additionalPropertiesAllowed", false).getBoolean()) {
+            JsonObject thenToBeMerged = JsonObject.EMPTY.put(MERGE_ME, then);
+            JsonObject resultToBeMerged = JsonObject.EMPTY.put(MERGE_ME, result);
+
+            // JSON Merge Patch:  "then" patched by "actual result"
             JsonObject thenMergedByResult = JSON_OBJECT_MERGER.merge(thenToBeMerged, resultToBeMerged);
+
+            // JSON Merge Patch: "actual result" patched by "then"
             JsonObject resultMergedByThen = JSON_OBJECT_MERGER.merge(resultToBeMerged, thenToBeMerged);
 
-            if (!resultMergedByThen.get("mergeMe").equals(result)) {
-                assertEquals(then, result);
-            }
-            assertEquals(thenMergedByResult.get("mergeMe"), resultMergedByThen.get("mergeMe"));
+            assertEquals(thenMergedByResult.get(MERGE_ME), resultMergedByThen.get(MERGE_ME));
         } else {
             assertEquals(then, result);
         }
     }
-
 
 
     /**

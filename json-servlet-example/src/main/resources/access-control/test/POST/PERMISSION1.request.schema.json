@@ -4,8 +4,10 @@
       "properties": {
         "body": {
           "properties": {
-            "hello": true
-          }
+            "hello": true,
+            "hidden_in_response": true
+          },
+          "additionalProperties": false
         }
       }
     }

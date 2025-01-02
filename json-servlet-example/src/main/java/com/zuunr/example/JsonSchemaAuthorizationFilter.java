@@ -17,6 +17,7 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNullApi;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.ByteArrayInputStream;
@@ -29,8 +30,8 @@ public class JsonSchemaAuthorizationFilter extends OncePerRequestFilter {
             .put("requestBody", JsonObject.EMPTY.put("content", JsonObject.EMPTY.put("application/json", JsonObject.EMPTY.put("schema", JsonObject.EMPTY))))
             .put("parameters", JsonArray.EMPTY);
 
-    private PermissionSchemaProvider permissionSchemaProvider;
-    private RequestAccessController requestAccessController;
+    private final PermissionSchemaProvider permissionSchemaProvider;
+    private final RequestAccessController requestAccessController;
 
     public JsonSchemaAuthorizationFilter(
             @Autowired PermissionSchemaProvider permissionSchemaProvider,
@@ -48,15 +49,11 @@ public class JsonSchemaAuthorizationFilter extends OncePerRequestFilter {
 
         JsonObject request = RequestUtil.createRequest(servletRequest);
 
-        JsonObject exchange = JsonObject.EMPTY.put("request", request); // TODO: MAke sure deserilalization is done from servlet reqeust directly
+        JsonObject exchange = JsonObject.EMPTY.put("request", request);
 
         InputStream inputStream;
 
-        //try {
-            inputStream = requestWrapper.getInputStream();
-        // } catch (Exception ioException) {
-        //    inputStream = null;
-        // }
+        inputStream = requestWrapper.getInputStream();
 
         exchange = OAS3Deserializer.deserializeRequest(exchange, inputStream, DEFAULT_OAS_DESER_OP);
 
@@ -90,8 +87,11 @@ public class JsonSchemaAuthorizationFilter extends OncePerRequestFilter {
 
         } catch (AuthenticationException authenticationException) {
             responseWrapper.setStatus(401);
+            responseWrapper.setContentType("application/json");
+            writeResponseBody(authenticationException.validation.asJson(), servletResponse);
         } catch (AuthorizationException authorizationException) {
             responseWrapper.setStatus(403);
+            responseWrapper.setContentType("application/json");
             writeResponseBody(authorizationException.validation.asJson(), servletResponse);
         }
     }
@@ -108,7 +108,7 @@ public class JsonSchemaAuthorizationFilter extends OncePerRequestFilter {
         try {
             servletOutputStream.write(responseBody.getBytes());
         } catch (Exception e) {
-            new RuntimeException("servletOutputStream.write(response.getBytes()) failed", e);
+            throw new RuntimeException("servletOutputStream.write(response.getBytes()) failed", e);
         }
     }
 

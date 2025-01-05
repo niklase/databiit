@@ -16,6 +16,7 @@
         <module>openapi</module>
         <module>openapi-design</module>
         <module>json-servlet-example</module>
+        <module>java-object-gen</module>
     </modules>
     <name>databiit-opensource</name>
 

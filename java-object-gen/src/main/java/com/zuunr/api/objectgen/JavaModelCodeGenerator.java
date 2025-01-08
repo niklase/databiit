@@ -26,6 +26,7 @@ public class JavaModelCodeGenerator {
             cfg.setLogTemplateExceptions(false);
             cfg.setWrapUncheckedExceptions(true);
             cfg.setFallbackOnNullLoopVariable(false);
+            //cfg.setAutoEscapingPolicy(Configuration.DISABLE_AUTO_ESCAPING_POLICY);
             cfg.setSQLDateAndTimeTimeZone(TimeZone.getDefault());
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -75,7 +76,7 @@ public class JavaModelCodeGenerator {
             JsonObject classModel = JsonObject.EMPTY;
 
             JsonObject schema = openApiDoc.get(pathToSchema).getJsonObject();
-            String javaLangType = getJavaLangType(schema);
+            String javaLangType = getJavaLangType(pathToSchema, openApiDoc, basePackage);
             if (javaLangType != null) {
                 return classesSoFar;
             }
@@ -86,9 +87,9 @@ public class JavaModelCodeGenerator {
             }
 
             if (schema.get("type").getString().equals("object")) {
+                // Handle JSON Schema for object type
                 JsonArray orderedProperties = schema.get("properties").getJsonObject().keys().sort();
                 JsonArrayBuilder builder = JsonArray.EMPTY.builder();
-
                 for (JsonValue key : orderedProperties) {
                     JsonObject fieldObject = JsonObject.EMPTY
                             .put("name", key.getString())
@@ -99,14 +100,41 @@ public class JavaModelCodeGenerator {
                 if (!fields.isEmpty()) {
                     classModel = classModel.put("fields", fields);
                 }
+                classModel = classModel
+                        .put("package", javaClassName.replaceAll("[.][^.]*$", ""))
+                        .put("className", javaClassName.substring(javaClassName.lastIndexOf('.') + 1));
+                for (JsonValue key : orderedProperties) {
+                    classesSoFar = classesSoFar.putAll(createJavaClasses(openApiDoc, pathToSchema.add("properties").add(key), classesSoFar, basePackage));
+                }
+            } else if (schema.get("type").getString().equals("array")) {
+                // Handle JSON Schema for array type
+                JsonObject itemsSchema = schema.get("items").getJsonObject();
 
+                // Create a class name for the items type
+                String itemsClassName = createJavaClassName(
+                        pathToSchema.add("items"), openApiDoc, basePackage);
+
+                // Add a field representing the array with the items type
+                JsonArrayBuilder builder = JsonArray.EMPTY.builder();
+                JsonObject fieldObject = JsonObject.EMPTY
+                        .put("name", "items")
+                        .put("className", "List<" + itemsClassName + ">");
+                builder.add(fieldObject);
+
+                JsonArray fields = builder.build();
+                classModel = classModel.put("fields", fields);
+
+                // Update class package and name
                 classModel = classModel
                         .put("package", javaClassName.replaceAll("[.][^.]*$", ""))
                         .put("className", javaClassName.substring(javaClassName.lastIndexOf('.') + 1));
 
-                for (JsonValue key : orderedProperties) {
-                    classesSoFar = classesSoFar.putAll(createJavaClasses(openApiDoc, pathToSchema.add("properties").add(key), classesSoFar, basePackage));
+                // Recursively generate class for items in the array, if it's a complex type
+                if (itemsSchema.get("type").getString().equals("object") || itemsSchema.get("type").getString().equals("array")) {
+                    classesSoFar = classesSoFar.putAll(createJavaClasses(
+                            openApiDoc, pathToSchema.add("items"), classesSoFar, basePackage));
                 }
+                return classesSoFar; // List<> should not be a rendered class
             }
             Template temp = cfg.getTemplate("class.ftlh");
 
@@ -119,13 +147,16 @@ public class JavaModelCodeGenerator {
         }
     }
 
-
     static String createJavaClassName(JsonArray pathToSchema, JsonObject openApiDoc, String basePackage) {
-        JsonValue schema = openApiDoc.get(pathToSchema);
 
-        String type = getJavaLangType(schema.getJsonObject());
-        if (type != null) {
-            return type;
+        String javaLangType = getJavaLangType(pathToSchema, openApiDoc, basePackage);
+        if (javaLangType != null) {
+            return javaLangType;
+        }
+
+        JsonValue schemaType = openApiDoc.get(pathToSchema).get("type");
+        if (schemaType.isString() && schemaType.getString().equals("array") || schemaType.isJsonArray() && schemaType.getJsonArray().contains("array")) {
+            return "List<" + createJavaClassName(pathToSchema.add("items"), openApiDoc, basePackage) + ">";
         }
 
         StringBuilder builder = new StringBuilder();
@@ -143,15 +174,19 @@ public class JavaModelCodeGenerator {
         String javaClass = builder.toString().replaceFirst("paths[.]([^.]*[.][^.]*[.]requestBody)[.]content[.]application_json[.]schema", "$1");
 
         javaClass = javaClass.replaceAll("[.]properties[.]([^.]*)", "_$1");
+        javaClass = javaClass.replaceAll("[.]items", "_items");
 
         int firstCharInName = javaClass.lastIndexOf(".") + 1;
         return basePackage + "." + javaClass.substring(0, firstCharInName) + Character.toUpperCase(javaClass.charAt(firstCharInName)) + javaClass.substring(firstCharInName + 1);
     }
 
-    static String getJavaLangType(JsonObject schema) {
+    static String getJavaLangType(JsonArray pathToSchema, JsonObject openApiDoc, String basePackage) {
+        JsonValue schema = openApiDoc.get(pathToSchema);
         JsonValue type = schema.get("type");
+
         if (type != null && type.isString()) {
             return switch (type.getString()) {
+                //case "array" -> "List<" + createJavaClassName(pathToSchema.add("items"), openApiDoc, basePackage) + ">";
                 case "string" -> "String";
                 case "number", "integer" -> "Number";
                 case "boolean" -> "Boolean";

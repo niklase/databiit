@@ -1,3 +1,4 @@
+<#noautoesc>
 package ${package};
 
 public class ${className} {
@@ -10,4 +11,4 @@ public class ${className} {
         return ${field.name};
     }
     </#list>
-}
+}</#noautoesc>

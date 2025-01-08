@@ -2,6 +2,7 @@ package com.zuunr.api.objectgen;
 
 import com.zuunr.json.JsonArray;
 import com.zuunr.json.JsonObject;
+import com.zuunr.json.JsonValueFactory;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,6 +24,7 @@ public class JavaModelCodeGeneratorTest {
         String name = JavaModelCodeGenerator.createJavaClassName(pathToSchema, openApiDoc, "com.example");
         assertEquals("String", name);
     }
+
 
     @Test
     void createJavaClasses1() {
@@ -93,5 +95,32 @@ public class JavaModelCodeGeneratorTest {
                         .put("com.example.admin_users.post.RequestBody", javaClass1)
                         .put("com.example.admin_users.post.RequestBody_prop1", javaClass2),
                 javaClasses);
+    }
+    @Test
+    void createJavaClasses4() {
+        JsonArray pathToSchema = JsonArray.of("paths", "admin/users", "post", "requestBody", "content", "application/json", "schema");
+        JsonObject openApiDoc = JsonObject.EMPTY
+                .put(pathToSchema, JsonObject.EMPTY
+                        .put("type", "object")
+                        .put("properties", JsonObject.EMPTY
+                                .put("friends", JsonObject.EMPTY
+                                        .put("type", "array")
+                                        .put("items", JsonObject.EMPTY
+                                                .put("type", "object")
+                                                .put("properties", JsonObject.EMPTY
+                                                        .put("firstName", JsonObject.EMPTY.put("type", "string"))
+                                                )
+
+                                        ))));
+        JsonObject classes = JavaModelCodeGenerator.createJavaClasses(openApiDoc, "com.example");
+
+        String expectedJson = """
+                {
+                  "com.example.admin_users.post.RequestBody_friends_items": "package com.example.admin_users.post;\\n\\npublic class RequestBody_friends_items {\\n    public final String firstName;\\n\\n    public final String getFirstName() {\\n        return firstName;\\n    }\\n}",
+                  "com.example.admin_users.post.RequestBody": "package com.example.admin_users.post;\\n\\npublic class RequestBody {\\n    public final List<com.example.admin_users.post.RequestBody_friends_items> friends;\\n\\n    public final List<com.example.admin_users.post.RequestBody_friends_items> getFriends() {\\n        return friends;\\n    }\\n}"
+                }
+                """;
+
+        assertEquals(JsonValueFactory.create(expectedJson), classes.jsonValue());
     }
 }

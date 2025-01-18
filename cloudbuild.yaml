@@ -1,0 +1,17 @@
+steps:
+  # Build and deploy app1
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'Deploy app1 to Cloud Run'
+    dir: 'app1'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'openapi-design'
+      - '--source'
+      - './openapi-design'
+      - '--region'
+      - 'europe-west1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'

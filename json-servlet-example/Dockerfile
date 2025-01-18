@@ -1,10 +1,19 @@
-FROM ghcr.io/graalvm/graalvm-ce:ol7-java17-22.3.0-b2
+# Use a lightweight Java 17 runtime image
+FROM eclipse-temurin:17-jre-alpine
+
+# Add a non-root user for security in production
+RUN addgroup -S spring && adduser -S spring -G spring
+USER spring:spring
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy the pre-built JAR file into the container
+# Assuming the JAR file is located in the submodule's "target" directory
+COPY target/*.jar app.jar
+
+# Expose the default Spring Boot port
 EXPOSE 8080
-RUN gu install js
-WORKDIR application
-COPY target/exploded/dependencies/ ./
-COPY target/exploded/spring-boot-loader/ ./
-COPY target/exploded/snapshot-dependencies/ ./
-COPY target/exploded/application/ ./
-ENV JAVA_OPTS="-XX:MaxRAMPercentage=50.0 -XshowSettings:vm -Xlog:gc*:stdout:tags,level,time"
-ENTRYPOINT [ "sh", "-c", "java $JAVA_OPTS -Dspring.profiles.active=container -Djava.security.egd=file:/dev/./urandom org.springframework.boot.loader.JarLauncher" ]
+
+# Run the Spring Boot application
+ENTRYPOINT ["java", "-jar", "app.jar"]

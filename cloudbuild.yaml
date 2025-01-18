@@ -16,12 +16,12 @@ steps:
 
   # Step 2: Build Docker image for the specific module (e.g., openapi-design)
   - name: 'gcr.io/cloud-builders/docker'
-    id: 'Build Docker image for openapi-design'
-    dir: 'openapi-design'                # Target the specific module's directory
+    id: 'Build Docker image for json-servlet-example'
+    dir: 'json-servlet-example'                # Target the specific module's directory
     args:
       - 'build'
       - '-t'
-      - 'gcr.io/databiit/openapi-design:latest'
+      - 'gcr.io/databiit/json-servlet-example:latest'
       - '.'
 
   # Step 3: Push Docker image to Google Container Registry

@@ -37,7 +37,7 @@ steps:
     args:
       - 'run'
       - 'deploy'
-      - 'openapi-design'
+      - 'json-servlet-example'
       - '--image'
       - 'gcr.io/databiit/json-servlet-example:latest'
       - '--platform'

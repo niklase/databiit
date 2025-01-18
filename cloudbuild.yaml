@@ -1,19 +1,43 @@
 steps:
-  # Build and deploy app1
+  # Step 1: Build and package all modules in the multi-module Maven project
+  - name: 'maven:3.9.2-eclipse-temurin-17' # Use the desired Maven+Java version
+    entrypoint: 'mvn'
+    args:
+      - 'clean'
+      - 'package'
+      - '-DskipTests'                      # Optional: Skip tests for faster builds
+
+  # Step 2: Build Docker image for the specific module (e.g., openapi-design)
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Build Docker image for openapi-design'
+    dir: 'openapi-design'                # Target the specific module's directory
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/databiit/openapi-design:latest'
+      - '.'
+
+  # Step 3: Push Docker image to Google Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Push Docker image for openapi-design'
+    args:
+      - 'push'
+      - 'gcr.io/databiit/openapi-design:latest'
+
+  # Step 4: Deploy the specific service to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'Deploy openapi-design to Cloud Run'
-    dir: 'openapi-design'
-    entrypoint: gcloud
     args:
       - 'run'
       - 'deploy'
-      - 'openapi-design'
-      - '--source'
-      - '.'
-      - '--region'
-      - 'europe-west1'
+      - 'openapi-design'                       # Cloud Run service name
+      - '--image'
+      - 'gcr.io/databiit/openapi-design:latest'
       - '--platform'
       - 'managed'
+      - '--region'
+      - 'europe-west1'                          # Adjust to your region
       - '--allow-unauthenticated'
+
 options:
   logging: CLOUD_LOGGING_ONLY

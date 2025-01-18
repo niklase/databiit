@@ -26,20 +26,20 @@ steps:
 
   # Step 3: Push Docker image to Google Container Registry
   - name: 'gcr.io/cloud-builders/docker'
-    id: 'Push Docker image for openapi-design'
+    id: 'Push Docker image for json-servlet-example'
     args:
       - 'push'
-      - 'gcr.io/databiit/openapi-design:latest'
+      - 'gcr.io/databiit/json-servlet-example:latest'
 
   # Step 4: Deploy the specific service to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    id: 'Deploy openapi-design to Cloud Run'
+    id: 'Deploy json-servlet-example to Cloud Run'
     args:
       - 'run'
       - 'deploy'
       - 'openapi-design'
       - '--image'
-      - 'gcr.io/databiit/openapi-design:latest'
+      - 'gcr.io/databiit/json-servlet-example:latest'
       - '--platform'
       - 'managed'
       - '--region'

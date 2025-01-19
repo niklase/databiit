@@ -14,13 +14,14 @@ steps:
   # Step 2: Automatically build and deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'Deploy to Cloud Run'
+    dir: 'json-servlet-example'
     args:
       - 'gcloud'
       - 'run'
       - 'deploy'
       - 'json-servlet-example'
       - '--source'
-      - './json-servlet-example'
+      - '.'
       - '--platform'
       - 'managed'
       - '--region'

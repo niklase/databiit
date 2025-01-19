@@ -13,6 +13,7 @@ import org.springframework.http.server.PathContainer;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,46 +32,6 @@ public class PermissionSchemaProvider {
     public PermissionSchemaProvider(@Autowired ResourcePatternResolver resourcePatternResolver) {
         this.resourcePatternResolver = resourcePatternResolver;
         readAndCacheSchemas();
-    }
-
-    private void readAndCacheSchemas() {
-        try {
-            Resource[] resources = resourcePatternResolver.getResources(ResourcePatternResolver.CLASSPATH_URL_PREFIX + BASEDIR + "/**/*/*.schema.json");
-            Resource baseDirResource = resourcePatternResolver.getResource(ResourcePatternResolver.CLASSPATH_URL_PREFIX + BASEDIR);
-            String basePath = baseDirResource.getURI().getPath();
-
-            Arrays.stream(resources)
-                    .forEach(resource -> {
-                        String urlPathAndMethodAndSchema;
-
-                        try {
-                            urlPathAndMethodAndSchema = resource.getURI().getPath().replace(basePath, "");
-                            Pattern pattern = Pattern.compile("^(.*)/([^/]*)/([^/]*)[.](request|response)[.]schema[.]json$");
-
-                            Matcher matcher = pattern.matcher(urlPathAndMethodAndSchema);
-                            if (matcher.find()) {
-                                String urlPath = matcher.group(1);
-                                String method = matcher.group(2);
-                                String permissionName = matcher.group(3);
-                                String requestOrResponse = matcher.group(4);
-
-                                JsonValue schema = JsonValueFactory.create(resource.getInputStream());
-                                permissionSchemas = permissionSchemas.put(JsonArray.of(urlPath, method, permissionName, requestOrResponse), schema);
-
-                                String permissionConfKey = permissionConfKeyOf(method, requestOrResponse, permissionName);
-                                List<PathPatternPermissionConfig> list = permissionConfByMethodAndPathPattern.get(permissionConfKey);
-                                list = list == null ? new ArrayList<>() : list;
-                                list.add(new PathPatternPermissionConfig(urlPath, schema.getJsonObject()));
-
-                                permissionConfByMethodAndPathPattern.put(permissionConfKey, list);
-                            }
-                        } catch (IOException ioException) {
-                            throw new RuntimeException(ioException);
-                        }
-                    });
-        } catch (IOException ioException) {
-            throw new RuntimeException(ioException);
-        }
     }
 
     private boolean validSchema(final JsonObject jsonObject) {
@@ -132,5 +93,80 @@ public class PermissionSchemaProvider {
             }
         }
         return bestMatch;
+    }
+
+    private void readAndCacheSchemas() {
+        try {
+            Resource[] resources = resourcePatternResolver.getResources(
+                    ResourcePatternResolver.CLASSPATH_URL_PREFIX + BASEDIR + "/**/*/*.schema.json");
+            Resource baseDirResource = resourcePatternResolver.getResource(
+                    ResourcePatternResolver.CLASSPATH_URL_PREFIX + BASEDIR);
+
+            // Get a normalized base URI (handle JAR-based resources)
+            String basePath = normalizeResourcePath(baseDirResource);
+
+            Arrays.stream(resources)
+                    .forEach(resource -> {
+                        String urlPathAndMethodAndSchema;
+
+                        try {
+                            String resourcePath = normalizeResourcePath(resource);
+                            if (resourcePath != null) {
+                                // Remove basePath prefix from resourcePath
+                                urlPathAndMethodAndSchema = resourcePath.replace(basePath, "");
+
+                                Pattern pattern = Pattern.compile(
+                                        "^(.*)/([^/]*)/([^/]*)[.](request|response)[.]schema[.]json$");
+
+                                Matcher matcher = pattern.matcher(urlPathAndMethodAndSchema);
+                                if (matcher.find()) {
+                                    String urlPath = matcher.group(1);
+                                    String method = matcher.group(2);
+                                    String permissionName = matcher.group(3);
+                                    String requestOrResponse = matcher.group(4);
+
+                                    // Process the schema
+                                    JsonValue schema = JsonValueFactory.create(resource.getInputStream());
+                                    permissionSchemas = permissionSchemas.put(
+                                            JsonArray.of(urlPath, method, permissionName, requestOrResponse), schema);
+
+                                    String permissionConfKey = permissionConfKeyOf(method, requestOrResponse, permissionName);
+                                    List<PathPatternPermissionConfig> list = permissionConfByMethodAndPathPattern.get(permissionConfKey);
+                                    list = list == null ? new ArrayList<>() : list;
+                                    list.add(new PathPatternPermissionConfig(urlPath, schema.getJsonObject()));
+
+                                    permissionConfByMethodAndPathPattern.put(permissionConfKey, list);
+                                }
+                            }
+                        } catch (IOException ioException) {
+                            throw new RuntimeException(ioException);
+                        }
+                    });
+        } catch (IOException ioException) {
+            throw new RuntimeException(ioException);
+        }
+    }
+
+    // Helper method to normalize resource paths and handle JAR-based resources
+    private String normalizeResourcePath(Resource resource) throws IOException {
+        try {
+            URI uri = resource.getURI();
+            if ("jar".equals(uri.getScheme())) {
+                // Handle JAR-based resources
+                String fullPath = uri.toString();
+                // Example: jar:file:/path/to/app.jar!/BASE_DIR
+                int delimiterIndex = fullPath.indexOf("!/");
+                if (delimiterIndex > 0) {
+                    return fullPath.substring(delimiterIndex + 2); // Extract internal JAR path
+                } else {
+                    return null;
+                }
+            } else {
+                // Handle file-based resources
+                return resource.getFile().getCanonicalPath();
+            }
+        } catch (IOException | IllegalStateException e) {
+            return null; // Resource cannot be resolved
+        }
     }
 }

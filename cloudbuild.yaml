@@ -2,6 +2,7 @@ steps:
   # Step 1: Build the specific Maven module
   - name: 'maven:3.9.2-eclipse-temurin-17'
     id: 'Build Maven Submodule'
+    entrypoint: 'mvn'
     args:
       - 'clean'
       - 'package'

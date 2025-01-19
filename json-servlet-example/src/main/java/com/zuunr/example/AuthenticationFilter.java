@@ -24,6 +24,12 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         try {
+            if (request.getRequestURI().equals("/")) {
+                response.setStatus(200);
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                response.getWriter().print("{\"status\": \"OK\"}");
+                return;
+            }
             Authentication authentication = AuthenticationService.getAuthentication((HttpServletRequest) request);
             SecurityContextHolder.getContext().setAuthentication(authentication);
             filterChain.doFilter(request, response);

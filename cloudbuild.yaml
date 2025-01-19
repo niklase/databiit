@@ -1,32 +1,16 @@
 steps:
-  # Print directory structure for debugging (optional)
-  - name: 'alpine'
-    entrypoint: 'sh'
-    args:
-      - '-c'
-      - 'ls -R /workspace'
-
-  # Step 1: Build and package all modules in the multi-module Maven project
-  - name: 'maven:3.9.2-eclipse-temurin-17' # Use the desired Maven+Java version
-    entrypoint: 'mvn'
+  # Step 1: Build the specific Maven module
+  - name: 'maven:3.9.2-eclipse-temurin-17'
+    id: 'Build Maven Submodule'
     args:
       - 'clean'
       - 'package'
-      - '-DskipTests'                      # Optional: Skip tests for faster builds
+      - '-DskipTests'
+      - '-pl'
+      - 'json-servlet-example'
+      - '-am'
 
-  # Step 2: Use Buildpacks to create a container image from the pre-built JAR file
-  - name: 'gcr.io/buildpacks/builder'
-    id: 'Build Container with Google Buildpacks'
-    args:
-      - 'pack'
-      - 'build'
-      - 'gcr.io/$PROJECT_ID/json-servlet-example:latest'
-      - '--path'
-      - './json-servlet-example/target/json-servlet-example-0.1.0-SNAPSHOT.jar' # Base directory for containerization
-      - '--builder=gcr.io/buildpacks/builder'
-      - '--env=BP_JVM_VERSION=17'
-
-  # Step 3: Deploy the container image to Cloud Run
+  # Step 2: Automatically build and deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'Deploy to Cloud Run'
     args:
@@ -34,13 +18,10 @@ steps:
       - 'run'
       - 'deploy'
       - 'json-servlet-example'
-      - '--image'
-      - 'gcr.io/$PROJECT_ID/json-servlet-example:latest'
+      - '--source'
+      - 'json-servlet-example'
       - '--platform'
       - 'managed'
       - '--region'
       - 'europe-west1'
       - '--allow-unauthenticated'
-
-options:
-  logging: CLOUD_LOGGING_ONLY

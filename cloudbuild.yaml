@@ -20,7 +20,7 @@ steps:
       - 'deploy'
       - 'json-servlet-example'
       - '--source'
-      - 'json-servlet-example'
+      - './json-servlet-example'
       - '--platform'
       - 'managed'
       - '--region'

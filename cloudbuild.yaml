@@ -22,7 +22,7 @@ steps:
       - 'build'
       - 'gcr.io/$PROJECT_ID/json-servlet-example:latest'
       - '--path'
-      - './json-servlet-example' # Base directory for containerization
+      - './json-servlet-example/target/json-servlet-example-0.1.0-SNAPSHOT.jar' # Base directory for containerization
       - '--builder=gcr.io/buildpacks/builder'
       - '--env=BP_JVM_VERSION=17'
 

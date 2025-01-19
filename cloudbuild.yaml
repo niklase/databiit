@@ -10,11 +10,20 @@ steps:
       - '-pl'
       - 'json-servlet-example'
       - '-am'
+  - name: 'ubuntu'
+    id: 'Prepare Deployment Directory'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        mkdir -p /workspace/deployment
+        cp -r json-servlet-example/* /workspace/deployment/
+        cp -r json-servlet-example/target/*.jar /workspace/deployment/
 
   # Step 2: Automatically build and deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'Deploy to Cloud Run'
-    dir: 'json-servlet-example'
+    dir: '/workspace/deployment'
     args:
       - 'gcloud'
       - 'run'

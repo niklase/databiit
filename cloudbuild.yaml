@@ -14,32 +14,28 @@ steps:
       - 'package'
       - '-DskipTests'                      # Optional: Skip tests for faster builds
 
-  # Step 2: Build Docker image for the specific module (e.g., openapi-design)
-  - name: 'gcr.io/cloud-builders/docker'
-    id: 'Build Docker image for json-servlet-example'
-    dir: 'json-servlet-example'                # Target the specific module's directory
+  # Step 2: Use Buildpacks to create a container image from the pre-built JAR file
+  - name: 'gcr.io/buildpacks/builder'
+    id: 'Build Container with Google Buildpacks'
     args:
+      - 'pack'
       - 'build'
-      - '-t'
-      - 'gcr.io/databiit/json-servlet-example:latest'
-      - '.'
+      - 'gcr.io/$PROJECT_ID/json-servlet-example:latest'
+      - '--path'
+      - './json-servlet-example' # Base directory for containerization
+      - '--builder=gcr.io/buildpacks/builder'
+      - '--env=BP_JVM_VERSION=17'
 
-  # Step 3: Push Docker image to Google Container Registry
-  - name: 'gcr.io/cloud-builders/docker'
-    id: 'Push Docker image for json-servlet-example'
-    args:
-      - 'push'
-      - 'gcr.io/databiit/json-servlet-example:latest'
-
-  # Step 4: Deploy the specific service to Cloud Run
+  # Step 3: Deploy the container image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    id: 'Deploy json-servlet-example to Cloud Run'
+    id: 'Deploy to Cloud Run'
     args:
+      - 'gcloud'
       - 'run'
       - 'deploy'
       - 'json-servlet-example'
       - '--image'
-      - 'gcr.io/databiit/json-servlet-example:latest'
+      - 'gcr.io/$PROJECT_ID/json-servlet-example:latest'
       - '--platform'
       - 'managed'
       - '--region'

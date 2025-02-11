@@ -11,7 +11,7 @@
           },
           "name": "age",
           "style": "form",
-          "alloweReserved": false,
+          "allowReserved": false,
           "explode": true,
           "required": false,
           "in": "query"

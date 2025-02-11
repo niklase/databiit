@@ -18,6 +18,7 @@
         -->
         <module>json-servlet-example</module>
         <module>java-object-gen</module>
+        <module>services-app</module>
     </modules>
     <name>databiit-opensource</name>
 </project>

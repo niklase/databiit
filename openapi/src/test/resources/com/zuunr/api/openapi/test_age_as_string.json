@@ -8,7 +8,7 @@
           },
           "name": "age",
           "style": "form",
-          "alloweReserved": false,
+          "allowReserved": false,
           "explode": false,
           "required": false,
           "in": "query"

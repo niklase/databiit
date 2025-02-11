@@ -15,7 +15,7 @@ steps:
     entrypoint: 'bash'
     args:
       - '-c'
-      - |
+      - | 
         mkdir -p /workspace/deployment
         cp -r json-servlet-example/* /workspace/deployment/
         cp -r json-servlet-example/target/*.jar /workspace/deployment/

@@ -167,7 +167,7 @@ public class JavaModelCodeGenerator {
                 builder.append('.');
             }
             String currentElement = pathToSchema.get(i).getString();
-            String escaped = currentElement.replace("_", "__").replace(".", "_dot_").replace("/", "_");
+            String escaped = currentElement.replace("_", "__").replace(".", "_dot_").replace("/", "_").replace("-", "_");
             builder.append(escaped);
         }
         // builder.append(".").append(filePath.last().getString().substring(0, 1).toUpperCase()).append(filePath.last().getString().substring(1));

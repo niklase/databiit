@@ -15,7 +15,6 @@
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
-    <groupId>com.zuunr</groupId>
     <artifactId>openapi</artifactId>
     <version>${databiit}</version>
 

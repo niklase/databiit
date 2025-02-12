@@ -24,6 +24,11 @@
         <dependencies>
             <dependency>
                 <groupId>com.zuunr</groupId>
+                <artifactId>java-object-gen</artifactId>
+                <version>${databiit}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zuunr</groupId>
                 <artifactId>json</artifactId>
                 <version>0.1.4</version>
             </dependency>

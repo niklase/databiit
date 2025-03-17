@@ -17,7 +17,7 @@ public class JsonUri {
     private JsonObject multiValueQuery;
 
 
-    private JsonUri(JsonValue jsonValue) {
+    public JsonUri(JsonValue jsonValue) {
         uri = URI.create(jsonValue.getString());
     }
 

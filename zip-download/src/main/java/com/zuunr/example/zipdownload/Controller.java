@@ -29,7 +29,7 @@ public class Controller {
     public void getZip(@RequestBody JsonValue body, HttpServletResponse response) throws IOException {
 
 
-        String fileName = body.get("fileName", "java_classes_for_openapi_doc_"+ISO8601Utils.format(new Date())+".zip").getString();
+        String fileName = body.get("fileName", "java_classes_for_openapi_doc_"+ ISO8601Utils.format(new Date())+".zip").getString();
 
         JsonObject classes = JavaModelCodeGenerator.createJavaClasses(
                 body.get("openApiDoc", JsonObject.EMPTY).getJsonObject(),

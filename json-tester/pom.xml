@@ -74,7 +74,8 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-        </dependency><dependency>
+        </dependency>
+        <dependency>
             <groupId>com.zuunr</groupId>
             <artifactId>json</artifactId>
         </dependency>

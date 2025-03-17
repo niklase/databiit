@@ -20,6 +20,7 @@
         <module>java-object-gen</module>
         <module>zip-download</module>
         <module>services-app</module>
+        <module>mermaid-schema</module>
     </modules>
     <name>databiit-opensource</name>
 </project>

@@ -34,28 +34,72 @@ public class MermaidController {
             /* Create a data-model */
             JsonValue schema = JsonValueFactory.create("""
                 {
-                  "$ref": "/$defs/Person",
-                  "$defs": {
-                    "Person": {
-                      "type": "object",
-                      "properties": {
-                        "name": { "type": "string" },
-                        "age": { "type": "integer" },
-                        "contact": {"$ref": "/$defs/Address"},
-                        "friends": {
-                            "type": "array",
-                            "items": {"$ref": "/$defs/Person"}
-                        }
+                      "$defs": {
+                          "customers": {
+                                  "properties": {
+                                      "name": {
+                                          "type": "string"
+                                      },
+                                      "meta": {
+                                          "$ref": "#/$defs/meta"
+                                      },
+                                      "vatNumber": {
+                                          "type": "string"
+                                      }
+                                  },
+                                  "type": "object",
+                                  "additionalProperties": false
+                          },
+                          "meta": {
+                                  "properties": {
+                                      "id": {
+                                          "type": "string"
+                                      },
+                                      "href": {
+                                          "type": "string"
+                                      }
+                                  }
+                          },
+                          "orders": {
+                                  "properties": {
+                                      "quantity": {
+                                          "type": "integer",
+                                          "description": "The number of ordered products"
+                                      },
+                                      "productName": {
+                                          "type": "string"
+                                      },
+                                      "meta": {
+                                          "$ref": "#/$defs/meta"
+                                      },
+                                      "customer": {
+                                          "$ref": "#/$defs/customers/item"
+                                      }
+                                  },
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "examples": [
+                                      {
+                                          "quantity": 5,
+                                          "productName": "Tomatoes",
+                                          "meta": {
+                                              "id": "555df23f1",
+                                              "href": "https://api.example.com/orders/555df23f1"
+                                          },
+                                          "customer": {
+                                              "name": "Small Company AB",
+                                              "meta": {
+                                                  "id": "f2f54443ef",
+                                                  "href": "https://api.example.com/customers/f2f54443ef"
+                                              },
+                                              "vatNumber": "55221103663201"
+                                          }
+                                      }
+                                  ]
+                              }
+                          
                       }
-                    },
-                    "Address": {
-                        "type": "object",
-                        "properties": {
-                          "street": { "type": "string" }
-                        }
-                    }
                   }
-                }
                 
                 """);
 

@@ -33,7 +33,7 @@ class MermaidClassTest {
                 {
                   "type": "object",
                   "properties": {
-                    "name": { "$ref": "/$defs/FirstName" },
+                    "name": { "$ref": "#/$defs/FirstName" },
                     "age": { "$ref": "/$defs/Age" }
                   }
                 }

@@ -15,7 +15,7 @@ public class ConfigRegistry {
                 "newState": {
                   "properties": {
                     "status": {
-                      "const": "DOING"
+                      "enum": ["TODO", "DOING", "DONE"]
                     }
                   }
                 }

@@ -1,0 +1,19 @@
+<mxFile>
+    <diagram>
+        <mxGraphModel>
+            <mxCell height="60" parent="1" id="[B@66ac5762"
+                    style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;"
+                    value="Person" vertex="1">
+                <mxGeometry width="140" height="HEIGHT" x="90" y="430" as="geometry"/>
+            </mxCell>
+            <mxCell parent="[B@66ac5762" id="[B@4982cc36"
+                    style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;"
+                    value="lastName: \" string\"" vertex="1">
+            <mxGeometry width="140" height="30" y="30" as="geometry"/>
+        </mxCell>
+        <mxCell parent="[B@66ac5762" id="[B@691939c9"
+                style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;"
+                value="firstName: \" string\"" vertex="1">
+        <mxGeometry width="140" height="30" y="30" as="geometry"/>
+    </mxCell>
+</mxGraphModel></diagram></mxFile>

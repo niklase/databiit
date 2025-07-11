@@ -21,7 +21,10 @@
         <module>zip-download</module>
         <module>services-app</module>
         <module>mermaid-schema</module>
+        <!--
         <module>form-builder</module>
+        -->
+        <module>diagram-maker</module>
     </modules>
     <name>databiit-opensource</name>
 </project>

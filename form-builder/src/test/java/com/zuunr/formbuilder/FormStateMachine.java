@@ -20,26 +20,21 @@ public class FormStateMachine {
     private final ConfigRegistry configRegistry = new ConfigRegistry();
     private final Database database = new Database();
 
-    public JsonObject create(JsonObject exchange) {
+    public JsonObject read(JsonObject request) {
+        String method = request.get("method").getString().toUpperCase();
+        boolean isRead = "GET".equals(method);
 
-        JsonObject request = exchange.get("request").getJsonObject();
         JsonObject config = configRegistry.getConfig(request);
-
-        JsonObject errorResponse = validateRequest(request, config);
-        if (errorResponse != null) {
-            return JsonObject.EMPTY.put("response", errorResponse);
-        }
-
-        JsonObject createdItem = database.createItem(request.get("body").getJsonObject());
-        return JsonObject.EMPTY
-                .put("status", 200)
-                .put("headers", JsonObject.EMPTY
-                        .put("location", JsonArray.of(
-                                URI.create(request.get("uri").getString()).getPath() + "/" + createdItem.get("id").getString())))
-                .put("body", createdItem);
+        JsonObject item = database.readItem(getItemId(request));
+        return JsonObject.EMPTY.put("status", 200).put("body", item);
     }
 
-    public JsonObject update(JsonObject request) {
+    public JsonObject write(JsonObject request) {
+
+        String method = request.get("method").getString().toUpperCase();
+        boolean isCreate = "POST".equals(method);
+        boolean isUpdate = "PATCH".equals(method);
+        boolean isDelete = "DELETE".equals(method);
 
         JsonObject config = configRegistry.getConfig(request);
 
@@ -49,26 +44,50 @@ public class FormStateMachine {
             return errorResponse;
         }
 
-        JsonObject currentState = database.readItem(getItemId(request));
-
-        if (currentState == null) {
-            return JsonObject.EMPTY.put("status", 404);
+        JsonObject currentState = null;
+        if (isUpdate || isDelete) {
+            currentState = database.readItem(getItemId(request));
+            if (currentState == null) {
+                return JsonObject.EMPTY.put("status", 404);
+            }
         }
 
-        JsonObjectMerger merger = new JsonObjectMerger(MergeStrategy.NULL_AS_DELETE_AND_ARRAY_AS_ATOM);
-        JsonObject newState = merger.merge(currentState, request.get("body").getJsonObject().remove("id"));
+        JsonObject newState = null;
+        if (isCreate) {
+            newState = request.get("body").getJsonObject();
+        } else if (isUpdate) {
+            JsonObjectMerger merger = new JsonObjectMerger(MergeStrategy.NULL_AS_DELETE_AND_ARRAY_AS_ATOM);
+            newState = merger.merge(currentState, request.get("body").getJsonObject().remove("id"));
+        }
 
         JsonValue transitionSchema = config.get("transitionSchema", JsonValue.FALSE);
 
         JsonObject exchangeWithState = exchange
-                .put("currentState", currentState)
-                .put("newState", newState);
+                .put("currentState", currentState == null ? JsonValue.NULL : currentState.jsonValue())
+                .put("newState", newState == null ? JsonValue.NULL : newState.jsonValue());
+
         JsonObject validationResult = validator.validate(exchangeWithState.jsonValue(), transitionSchema, OutputStructure.DETAILED);
         if (!JsonValue.TRUE.equals(validationResult.get("valid"))) {
             return JsonObject.EMPTY.put("status", 409).put("body", validationResult);
         }
-        database.writeItem(newState);
-        return JsonObject.EMPTY.put("status", 200).put("body", newState);
+
+        if (isCreate) {
+            newState = database.createItem(newState);
+            return JsonObject.EMPTY
+                    .put("status", 201)
+                    .put("headers", JsonObject.EMPTY.put("location", JsonArray.of(URI.create(request.get("uri").getString()).getPath() + "/" + newState.get("id").getString())))
+                    .put("body", newState);
+        } else if (isDelete){
+            database.deleteItem(getItemId(request));
+            return JsonObject.EMPTY
+                    .put("status", 204);
+        } else if (isUpdate) {
+            database.writeItem(newState);
+            return JsonObject.EMPTY
+                    .put("status", 200)
+                    .put("body", newState);
+        }
+        return JsonObject.EMPTY.put("status", 500);
     }
 
     private String getItemId(JsonObject request) {

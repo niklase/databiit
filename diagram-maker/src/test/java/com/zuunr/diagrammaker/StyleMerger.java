@@ -8,11 +8,16 @@ public class StyleMerger {
     private static JsonObjectMerger merger = new JsonObjectMerger(MergeStrategy.NULL_AS_VALUE_AND_ARRAY_AS_ATOM);
 
     public static JsonValue merge(JsonValue css1, JsonValue css2) {
+
+        css1 = css1 == null ? JsonValue.EMPTY_STRING : css1;
+        css2 = css2 == null ? JsonValue.EMPTY_STRING : css2;
+
         JsonObject css1JsonValue = cssAsJsonObject(css1.getString());
         JsonObject css2JsonValue = cssAsJsonObject(css2.getString());
         JsonObject mergedCss = merger.merge(css1JsonValue, css2JsonValue);
-        JsonArray sortedKeys = mergedCss.keys().sort();
+
         StringBuilder mergedStyle = new StringBuilder();
+        JsonArray sortedKeys = mergedCss.keys().sort();
         for (JsonValue key : sortedKeys) {
             JsonValue value = mergedCss.get(key.getString());
             mergedStyle.append(key.getString());

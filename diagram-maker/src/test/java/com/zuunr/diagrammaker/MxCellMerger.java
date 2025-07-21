@@ -32,11 +32,15 @@ public class MxCellMerger {
                 if (!mxCellId.startsWith("auto:")) {
                     newMxCells.add(mxCell);
                 } else {
-                    // do not add this one as it is auto-generated but dos no longer exist
+                    // do not add this one as it is auto-generated but does no longer exist
                 }
             } else {
                 autoCellsLeft = autoCellsLeft.remove(mxCellId);
-                newMxCells.add(merger.merge(mxCell, autoCell));
+                if (mxCellId.startsWith("auto:")) {
+                    newMxCells.add(mergeMxCells(mxCell, autoCell));
+                } else {
+                    newMxCells.add(mxCell);
+                }
             }
         }
         return newMxCells.addAll(autoCellsLeft.values().sort(new Comparator<JsonValue>() {
@@ -48,8 +52,9 @@ public class MxCellMerger {
     }
 
     private static JsonObject mergeMxCells(JsonObject mxCell1, JsonObject mxCell2) {
-        JsonValue mergedStyle = StyleMerger.merge(mxCell1.get("style"), mxCell2.get("style"));
-        return merger.merge(mxCell1, mxCell2).put("style", mergedStyle);
+        //JsonValue mergedStyle = StyleMerger.merge(mxCell1.get("style"), mxCell2.get("style"));
+        return merger.merge(mxCell1, mxCell2)
+                //.put("style", mergedStyle)
+        ;
     }
-
 }

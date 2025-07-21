@@ -1,10 +1,5 @@
 package com.zuunr.diagrammaker;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.zuunr.json.JsonValue;
-import com.zuunr.json.JsonValueFactory;
 import org.junit.jupiter.api.Test;
 
 public class DiagramTest {
@@ -49,10 +44,10 @@ public class DiagramTest {
     void addMxCell() {
 
         String mxCell = """
-               <mxCell id="other" value="Person" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                 <mxGeometry x="90" y="430" width="140" height="60" as="geometry" />
-               </mxCell>
-               """;
+                <mxCell id="other" value="Person" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                  <mxGeometry x="90" y="430" width="140" height="60" as="geometry" />
+                </mxCell>
+                """;
 
         Diagram diagram = Diagram.create().addMxCell(mxCell);
         System.out.print("diagram as XML:" + diagram.toString());

@@ -26,7 +26,7 @@ public class JsonXmlSerializer {
             }
         }
 
-        if (nestedXml.isEmpty()){
+        if (nestedXml.isEmpty()) {
             return xml.append(" />").toString();
         } else {
             xml.append(">");

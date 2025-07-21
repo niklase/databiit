@@ -1,0 +1,23 @@
+<mxfile agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+        host="drawio-plugin" etag="M-mlRtzzpZpIx5QfoOWe" type="embed" version="22.1.22"
+        modified="2025-05-24T21:34:12.935Z">
+    <diagram id="AKPzqUBiTfoBOGSDBTsb" name="Page-1">
+        <mxGraphModel tooltips="1" grid="1" dx="599" gridSize="10" pageWidth="827" arrows="1" shadow="0" math="0"
+                      connect="1" pageHeight="1169" fold="1" dy="770" pageScale="1" page="1" guides="1">
+            <root>
+                <mxCell id="0"/>
+                <mxCell parent="0" id="1"/>
+                <mxCell parent="1" id="other"
+                        style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;"
+                        value="Person" vertex="1">
+                    <mxGeometry width="140" height="60" x="90" y="430" as="geometry"/>
+                </mxCell>
+                <mxCell parent="1" id="auto:other"
+                        style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;"
+                        value="Person" vertex="1">
+                    <mxGeometry width="140" height="60" x="90" y="430" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

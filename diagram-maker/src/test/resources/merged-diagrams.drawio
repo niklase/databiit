@@ -7,14 +7,14 @@
             <root>
                 <mxCell id="0"/>
                 <mxCell parent="0" id="1"/>
-                <mxCell parent="1" id="other"
+                <mxCell parent="1" id="someid-7"
                         style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;"
-                        value="Person" vertex="1">
+                        value="CUSTOM VALUE" vertex="1">
                     <mxGeometry width="140" height="60" x="90" y="430" as="geometry"/>
                 </mxCell>
-                <mxCell parent="1" id="auto:other"
+                <mxCell parent="1" id="auto:someid-7"
                         style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;"
-                        value="Person" vertex="1">
+                        value="AUTO VALUE" vertex="1">
                     <mxGeometry width="140" height="60" x="90" y="430" as="geometry"/>
                 </mxCell>
             </root>

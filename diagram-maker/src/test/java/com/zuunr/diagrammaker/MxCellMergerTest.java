@@ -22,7 +22,7 @@ public class MxCellMergerTest {
                     <mxCell id="0" />
                     <mxCell id="1" parent="0" />
                     <mxCell id="##ID##" value="##VALUE##" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                      <mxGeometry x="90" y="430" width="140" height="60" as="geometry" />
+                      <mxGeometry x="##X##" y="##Y##" width="140" height="60" as="geometry" />
                     </mxCell>
                   </root>
                 </mxGraphModel>
@@ -30,11 +30,11 @@ public class MxCellMergerTest {
             </mxfile>
             """;
 
-    private static JsonValue DRAWIO_TEMPLATE = drawioTemplate("##ID##", "##VALUE##");
+    private static JsonValue DRAWIO_TEMPLATE = drawioTemplate("##ID##", "##VALUE##", "##X##", "##Y##");
 
-    private static JsonValue drawioTemplate(String cellId, String value) {
+    private static JsonValue drawioTemplate(String cellId, String value, String mxGeometry_x, String mxGeometry_y) {
         try {
-            JsonNode jsonNode = xmlMapper.readTree("<wrapper>" + DRAWIO_XML.replace("##ID##", cellId).replace("##VALUE##", value) + "</wrapper>");
+            JsonNode jsonNode = xmlMapper.readTree("<wrapper>" + DRAWIO_XML.replace("##ID##", cellId).replace("##VALUE##", value).replace("##X##", mxGeometry_x).replace("##Y##", mxGeometry_y) + "</wrapper>");
             JsonValue fileAsJson = JsonValueFactory.create(jsonNode.toString());
             return fileAsJson;
         } catch (Exception e) {
@@ -42,49 +42,67 @@ public class MxCellMergerTest {
         }
     }
 
-
     private static JsonArray pathToMxCells = JsonArray.of("mxfile", "diagram", "mxGraphModel", "root", "mxCell");
 
     private static MxCellMerger mxCellMerger = new MxCellMerger();
 
-    private static JsonArray renderMxCells(String cellId, String value) {
-        JsonValue fileAsJson = drawioTemplate(cellId, value);
+    private static JsonArray renderMxCells(String cellId, String value, String mxGeometry_x, String mxGeometry_y) {
+        JsonValue fileAsJson = drawioTemplate(cellId, value, mxGeometry_x, mxGeometry_y);
         JsonArray mxCells = fileAsJson.get(pathToMxCells).getJsonArray();
         return mxCells;
     }
-
 
 
     @Test
     void customValueOverridesNonAutoAnnotatedIdOfAutomaticDrawio() throws Exception {
         JsonArray result = test(JsonObject.EMPTY
                         .put("id", "someid-7")
-                        .put("value", "CUSTOM VALUE"),
+                        .put("value", "CUSTOM VALUE")
+                        .put(JsonArray.of("mxGeometry", "x"), "150")
+                        .put(JsonArray.of("mxGeometry", "y"), "50"),
                 JsonObject.EMPTY
                         .put("id", "someid-7")
-                        .put("value", "AUTO VALUE"));
+                        .put("value", "AUTO VALUE")
+                        .put(JsonArray.of("mxGeometry", "x"), "10")
+                        .put(JsonArray.of("mxGeometry", "y"), "20")
+
+        );
         assertEquals(JsonValue.of("CUSTOM VALUE"), result.get(2).get("value"));
+        assertEquals(JsonValue.of("150"), result.get(2).get("mxGeometry").get("x"));
+        assertEquals(JsonValue.of("50"), result.get(2).get("mxGeometry").get("y"));
     }
 
     @Test
     void customValueOverriddenbyAutoAnnotatedIdOfAutomaticDrawio() throws Exception {
         JsonArray result = test(JsonObject.EMPTY
                         .put("id", "auto:someid-7")
-                        .put("value", "CUSTOM VALUE"),
+                        .put("value", "CUSTOM VALUE")
+                        .put(JsonArray.of("mxGeometry", "x"), "150")
+                        .put(JsonArray.of("mxGeometry", "y"), "50"),
                 JsonObject.EMPTY
                         .put("id", "auto:someid-7")
-                        .put("value", "AUTO VALUE"));
+                        .put("value", "AUTO VALUE")
+                        .put(JsonArray.of("mxGeometry", "x"), "10")
+                        .put(JsonArray.of("mxGeometry", "y"), "20")
+        );
         assertEquals(JsonValue.of("AUTO VALUE"), result.get(2).get("value"));
+        assertEquals(JsonValue.of("150"), result.get(2).get("mxGeometry").get("x"));
+        assertEquals(JsonValue.of("50"), result.get(2).get("mxGeometry").get("y"));
+
     }
 
     @Test
     void autoValueGetsAddedWhenThereIsNoCustomValue() throws Exception {
         JsonArray result = test(JsonObject.EMPTY
                         .put("id", "someid-7")
-                        .put("value", "CUSTOM VALUE"),
+                        .put("value", "CUSTOM VALUE")
+                        .put(JsonArray.of("mxGeometry", "x"), "150")
+                        .put(JsonArray.of("mxGeometry", "y"), "50"),
                 JsonObject.EMPTY
                         .put("id", "auto:someid-7")
-                        .put("value", "AUTO VALUE"));
+                        .put("value", "AUTO VALUE")
+                        .put(JsonArray.of("mxGeometry", "x"), "10")
+                        .put(JsonArray.of("mxGeometry", "y"), "20"));
 
         assertEquals(result.size(), 4, "both the custom value and the auto value should be present in the result.");
         boolean autoValueFound = false;
@@ -93,14 +111,11 @@ public class MxCellMergerTest {
             if (cell.get("id").getString().equals("auto:someid-7")) {
                 assertEquals(JsonValue.of("AUTO VALUE"), cell.get("value"));
                 autoValueFound = true;
-
             }
             if (cell.get("id").getString().equals("someid-7")) {
                 assertEquals(JsonValue.of("CUSTOM VALUE"), cell.get("value"));
                 customValueFound = true;
-
             }
-
         }
         assertEquals(true, autoValueFound, "The automatically generated id was not found in the merged result.");
         assertEquals(true, customValueFound, "The custom value was not found in the merged result.");
@@ -109,13 +124,20 @@ public class MxCellMergerTest {
 
     JsonArray test(JsonObject custom, JsonObject auto) throws Exception {
 
-        JsonArray mxCellsAuto = renderMxCells(auto.get("id").getString(), auto.get("value").getString());
-        JsonArray mxCellsCustom = renderMxCells(custom.get("id").getString(), custom.get("value").getString());
+        JsonArray mxCellsAuto = renderMxCells(
+                auto.get("id").getString(),
+                auto.get("value").getString(),
+                auto.get(JsonArray.of("mxGeometry", "x")).getString(),
+                auto.get(JsonArray.of("mxGeometry", "y")).getString());
+
+        JsonArray mxCellsCustom = renderMxCells(
+                custom.get("id").getString(),
+                custom.get("value").getString(),
+                custom.get(JsonArray.of("mxGeometry", "x")).getString(),
+                custom.get(JsonArray.of("mxGeometry", "y")).getString());
 
         JsonArray mergedMxCells = mxCellMerger.merge(mxCellsCustom, mxCellsAuto);
-
         JsonValue mergedFilesAsJson = DRAWIO_TEMPLATE.put(pathToMxCells, mergedMxCells.jsonValue());
-
 
         JsonXmlSerializer xmlSerializer = new JsonXmlSerializer();
         String mergedXml = xmlSerializer.serialize(mergedFilesAsJson);

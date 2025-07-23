@@ -37,7 +37,7 @@ public class MxCellMerger {
             } else {
                 autoCellsLeft = autoCellsLeft.remove(mxCellId);
                 if (mxCellId.startsWith("auto:")) {
-                    newMxCells.add(mergeMxCells(mxCell, autoCell));
+                    newMxCells.add(forgeMxCells(mxCell, autoCell));
                 } else {
                     newMxCells.add(mxCell);
                 }
@@ -51,10 +51,27 @@ public class MxCellMerger {
         })).build();
     }
 
+    private static JsonObject forgeMxCells(JsonObject mxCellCustom, JsonObject mxCellAuto) {
+        //JsonValue mergedStyle = StyleMerger.merge(mxCell1.get("style"), mxCell2.get("style"));
+        JsonObject forged = merger.merge(mxCellCustom, mxCellAuto)
+                //.put("style", mergedStyle)
+                ;
+
+        // x/y position and height/weight should be customizable
+        JsonObjectBuilder mxGeometry = JsonObject.EMPTY.builder();
+        JsonObject customGeometry = mxCellCustom.get("mxGeometry", JsonValue.NULL).getJsonObject();
+        JsonValue width = customGeometry.get("width", mxCellAuto.get("width"));
+        JsonValue height = customGeometry.get("height", mxCellAuto.get("height"));
+        JsonValue x = customGeometry.get("x", mxCellAuto.get("x"));
+        JsonValue y = customGeometry.get("y", mxCellAuto.get("y"));
+        customGeometry.put("x", x).put("y",y).put("width", width).put("height", height);
+        return forged.put("mxGeometry", customGeometry);
+    }
+
     private static JsonObject mergeMxCells(JsonObject mxCell1, JsonObject mxCell2) {
         //JsonValue mergedStyle = StyleMerger.merge(mxCell1.get("style"), mxCell2.get("style"));
         return merger.merge(mxCell1, mxCell2)
                 //.put("style", mergedStyle)
-        ;
+                ;
     }
 }

@@ -1,0 +1,1 @@
+/jgraph.github.io/mxgraph/javascript/examples/js/editor/editor.js

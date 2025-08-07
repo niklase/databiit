@@ -1,18 +1,52 @@
-<mxfile agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/27.0.9 Chrome/134.0.6998.205 Electron/35.4.0 Safari/537.36" host="Electron" version="27.0.9">
-  <diagram id="AKPzqUBiTfoBOGSDBTsb" name="Page-1">
-    <mxGraphModel dx="1002" dy="454" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
-      <root>
-        <mxCell id="0" />
-        <mxCell id="1" parent="0" />
-        <mxCell id="someid-7" value="CUSTOM VALUE" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1" collapsed="1">
-          <mxGeometry x="320" y="80" width="130" height="30" as="geometry">
-            <mxRectangle x="320" y="80" width="140" height="60" as="alternateBounds" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="auto:someid-7" value="AUTO VALUE" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="400" y="210" width="140" height="60" as="geometry" />
-        </mxCell>
-      </root>
-    </mxGraphModel>
-  </diagram>
+<mxfile host="embed.diagrams.net"
+        agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:138.0) Gecko/20100101 Firefox/138.0" version="28.0.6">
+    <diagram id="O5m0Za5ys5D574SArSo_" name="Page-1">
+        <mxGraphModel tooltips="1" grid="1" dx="599" gridSize="10" pageWidth="827" arrows="1" shadow="0" math="0"
+                      connect="1" pageHeight="1169" fold="1" dy="770" pageScale="1" page="1" guides="1">
+            <root>
+                <mxCell id="0"/>
+                <mxCell parent="0" id="1" value="layer1"/>
+                <mxCell parent="/$defs/Address" id="/$defs/Address/properties/street"
+                        style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;"
+                        value="street: string" vertex="1">
+                    <mxGeometry width="140" height="30" y="30" as="geometry"/>
+                </mxCell>
+                <mxCell parent="1" id="/$defs/Address"
+                        style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;"
+                        value="Address" vertex="1">
+                    <mxGeometry width="140" height="60" x="90" y="430" as="geometry"/>
+                </mxCell>
+                <mxCell parent="/$defs/Person" id="/$defs/Person/properties/name"
+                        style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;"
+                        value="name: string" vertex="1">
+                    <mxGeometry width="140" height="30" y="30" as="geometry"/>
+                </mxCell>
+                <mxCell parent="1" id="/$defs/Person#homeAddress" edge="1"
+                        style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=open;endFill=0;"
+                        value="homeAddress" source="/$defs/Person" target="/$defs/Address">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell parent="1" id="/$defs/Person#pets" edge="1"
+                        style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=open;endFill=0;"
+                        value="pets" source="/$defs/Person" target="/$defs/Person/properties/pets">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell parent="/$defs/Person/properties/pets" id="/$defs/Person/properties/pets/properties/petName"
+                        style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;"
+                        value="petName: string" vertex="1">
+                    <mxGeometry width="140" height="30" y="30" as="geometry"/>
+                </mxCell>
+                <mxCell parent="1" id="/$defs/Person/properties/pets"
+                        style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;"
+                        value="[object]" vertex="1">
+                    <mxGeometry width="140" height="60" x="90" y="430" as="geometry"/>
+                </mxCell>
+                <mxCell parent="1" id="/$defs/Person"
+                        style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;"
+                        value="Person" vertex="1">
+                    <mxGeometry width="140" height="60" x="90" y="430" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
 </mxfile>

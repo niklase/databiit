@@ -79,8 +79,9 @@
             <artifactId>json</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.zuunr</groupId>
-            <artifactId>json-tester</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

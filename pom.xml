@@ -7,9 +7,8 @@
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <modules>
-        <!--
         <module>../json</module>
-        -->
+
         <module>parent</module>
         <module>json-tester</module>
         <module>openapi</module>
@@ -21,6 +20,8 @@
         <module>zip-download</module>
         <module>services-app</module>
         <module>mermaid-schema</module>
+
+        <module>drawio-server</module>
         <!--
         <module>form-builder</module>
         -->

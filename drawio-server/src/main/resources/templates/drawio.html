@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draw.io Integration</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mxgraph/4.2.2/mxClient.min.js"></script>
+</head>
+<body>
+<h1>Draw.io Integration</h1>
+
+<!-- Container for the Draw.io Editor -->
+<div id="drawio-editor-container" style="width: 100%; height: 70vh; border: 1px solid #ccc;"></div>
+
+<button id="save-button" style="margin-top: 10px;">Save Diagram</button>
+
+<script>
+    // Initialize the Draw.io Editor
+    const container = document.getElementById('drawio-editor-container');
+    const editor = new mxEditor();
+    editor.setGraphContainer(container);
+
+    // Load the dummy diagram from the backend
+    fetch('/load-diagram')
+        .then(response => response.text())
+        .then(diagramXml => {
+            const doc = mxUtils.parseXml(diagramXml);
+            const codec = new mxCodec(doc);
+            codec.decode(doc.documentElement, editor.graph.getModel());
+        })
+        .catch(error => console.error('Error loading diagram:', error));
+
+    // Save the diagram
+    document.getElementById('save-button').addEventListener('click', () => {
+        const codec = new mxCodec();
+        const model = editor.graph.getModel();
+        const node = codec.encode(model);
+        const xml = mxUtils.getPrettyXml(node);
+
+        fetch('/save-diagram', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/xml' },
+            body: xml
+        })
+            .then(response => response.text())
+            .then(message => alert(message))
+            .catch(error => console.error('Error saving diagram:', error));
+    });
+</script>
+</body>
+</html>

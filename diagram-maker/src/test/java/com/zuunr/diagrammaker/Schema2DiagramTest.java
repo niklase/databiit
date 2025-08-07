@@ -1,5 +1,6 @@
 package com.zuunr.diagrammaker;
 
+import com.zuunr.diagrammaker.mxcell.Schema;
 import com.zuunr.json.*;
 import com.zuunr.json.pointer.JsonPointer;
 import com.zuunr.json.schema.Keywords;
@@ -11,18 +12,90 @@ import java.util.Base64;
 public class Schema2DiagramTest {
 
     @Test
-    void test() {
-        JsonValue personSchema = JsonValueFactory.create("""
+    void test1() {
+        JsonValue schema = JsonValueFactory.create("""
                 {
+                    "type": "object",
                     "properties": {
-                        "firstName": {"type": "string"},
-                        "lastName": {"type": "string"},
-                        "home": {"type": "object", "properties": {"street": {"type": "string"}, "country": {"type": "object", "properties": {"name": {"type": "string"}}}}}
+                        "firstName": {"type": "string"}
                     }
                 }
                 """);
+        test(schema);
+    }
 
-        JsonObject flatSchema = JsonSchemaFlattener.flatten(JsonArray.EMPTY, personSchema);
+    @Test
+    void test2() {
+        JsonValue schema = JsonValueFactory.create("""
+                {
+                  "$defs": {
+                    "Person": {
+                        "type": "object",
+                        "properties": {
+                            "firstName": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "BankAccount": {
+                        "type": "object",
+                        "properties": {
+                            "accountNumber": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                  }
+                }
+                """);
+        test(schema);
+    }
+
+    @Test
+    void testOriginal() {
+
+        JsonValue schema = JsonValueFactory.create("""
+                {
+                   "$ref": "#/$defs/Person",
+                   "$defs": {
+                     "Person": {
+                       "properties": {
+                         "firstName": {
+                           "type": "string"
+                         },
+                         "lastName": {
+                           "type": "string"
+                         },
+                         "home": {
+                           "type": "object",
+                           "properties": {
+                             "ownedBy": {
+                               "$ref": "#/$defs/Person"
+                             },
+                             "street": {
+                               "type": "string"
+                             },
+                             "country": {
+                               "type": "object",
+                               "properties": {
+                                 "name": {
+                                   "type": "string"
+                                 }
+                               }
+                             }
+                           }
+                         }
+                       }
+                     }
+                   }
+                 }
+                """);
+        test(schema);
+    }
+
+    void test(JsonValue schema) {
+
+        JsonObject flatSchema = JsonSchemaFlattener.flatten(JsonArray.EMPTY, schema);
 
         JsonValue mxCell = JsonValueFactory.create("""
                 {
@@ -41,14 +114,15 @@ public class Schema2DiagramTest {
                             }
                 """);
 
-        JsonObject schemaRegister = JsonObject.EMPTY.put("https://example.com/schemas/person", personSchema);
+        JsonObject schemaRegister = JsonObject.EMPTY.put("https://example.com/schemas/person", schema);
 
         // JsonArray mxCells = createMxCellsForOneSchema(flatSchema, JsonArray.of(""));
-        JsonArray mxCells = createMxCells(flatSchema);
+        JsonArray flatSchemaMxCells = createMxCells(flatSchema);
+        JsonArray jsonSchemaMxCells = Schema.mxCellsOf(schema);
 
-        String xml = new JsonXmlSerializer().serialize(JsonObject.EMPTY.put("mxGraphModel", JsonObject.EMPTY
+        JsonObject mxGraphModel = JsonObject.EMPTY.put("mxGraphModel", JsonObject.EMPTY
                 .put("root", JsonObject.EMPTY
-                        .put("mxCell", mxCells))
+                        .put("mxCell", "MX-CELLS"))
                 .put("dx", "599")
                 .put("dy", "770")
                 .put("grid", "1")
@@ -64,19 +138,35 @@ public class Schema2DiagramTest {
                 .put("pageHeight", "1169")
                 .put("math", "0")
                 .put("shadow", "0")
-        ).jsonValue());
+
+        );
+
+        JsonObject fromFlatSchema = mxGraphModel.put(JsonArray.of("mxGraphModel", "root", "mxCell"), flatSchemaMxCells);
+        JsonObject fromSchema = mxGraphModel.put(JsonArray.of("mxGraphModel", "root", "mxCell"), jsonSchemaMxCells);
+
+
+        String flatSchemaXml = new JsonXmlSerializer().serialize(fromFlatSchema.jsonValue());
+        String fromSchemaXml = new JsonXmlSerializer().serialize(fromSchema.jsonValue());
+
 
         String xmlStart = """
                 <mxfile host="drawio-plugin" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" modified="2025-05-24T21:34:12.935Z" version="22.1.22" etag="M-mlRtzzpZpIx5QfoOWe" type="embed">
                   <diagram name="Page-1" id="AKPzqUBiTfoBOGSDBTsb">
                 """;
 
-        String result = new StringBuilder()
+        String flatSchemaResult = new StringBuilder()
                 .append(xmlStart)
-                .append(xml)
+                .append(flatSchemaXml)
                 .append("</diagram></mxfile>").toString();
 
-        System.out.print("result: " + result);
+        String schemaResult = new StringBuilder()
+                .append(xmlStart)
+                .append(fromSchemaXml)
+                .append("</diagram></mxfile>").toString();
+
+        System.out.println("flat schema result: " + flatSchemaResult);
+
+        System.out.println("standard JSON Schema result: " + schemaResult);
     }
 
     private JsonArray createMxCellsForOneSchema(JsonObject schemaRegister, JsonPointer schemaRegisterId) {
@@ -85,6 +175,7 @@ public class Schema2DiagramTest {
         JsonObject schema = schemaRegister.get(schemaRegisterId.getJsonPointerString().getString()).getJsonObject();
 
         JsonObject mxCell = JsonObject.EMPTY
+                .put("plain-id", clearTextId)
                 .put("id", mxCellId)
                 .put("mxGeometry", JsonObject.EMPTY
                         .put("width", "140")
@@ -106,13 +197,15 @@ public class Schema2DiagramTest {
         int primitivePropertyIndex = 0;
         for (int i = 0; i < propertyKeys.size(); i++) {
             String key = propertyKeys.get(i).getString();
-            JsonValue value = properties.get(key);
+            JsonValue propertySchema = properties.get(key);
 
-            JsonObject primitivePropertyMxCell = mxCellOfPrimitiveProperty(key, value);
+            JsonObject primitivePropertyMxCell = mxCellOfPrimitiveProperty(key, propertySchema);
+            String plainPropertyId = clearTextId + "#" + key;
             if (primitivePropertyMxCell != null) {
                 mxCellsBuilder = mxCellsBuilder
                         .add(primitivePropertyMxCell
-                                .put("id", encodeId(mxCellId + "#" + key))
+                                .put("plain-id", plainPropertyId)
+                                .put("id", encodeId(plainPropertyId))
                                 .put("parent", mxCellId)
                                 .put(JsonArray.of("mxGeometry", "y"), "" + (30 * (primitivePropertyIndex + 1)))
                         );
@@ -120,7 +213,8 @@ public class Schema2DiagramTest {
             } else {
                 // Create arrow
                 JsonObject mxCellOfObjectProperty = JsonObject.EMPTY
-                        .put("id", encodeId(mxCellId + "#" + key))
+                        .put("plain-id", plainPropertyId)
+                        .put("id", encodeId(plainPropertyId))
                         .put("value", key)
                         .put("style", "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;")
                         .put("edge", "1")
@@ -128,8 +222,14 @@ public class Schema2DiagramTest {
                         .put("source", mxCellId)
                         .put("mxGeometry", JsonObject.EMPTY.put("relative", "1").put("as", "geometry"));
                 //<mxCell id="8-51mRvOmae2Kr2BzAAm-1" value="qwerty" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="Lw==" target="L34xaG9tZX4xY291bnRyeQ==">
-                String plainId = schemaRegisterId.asArray().add(key).as(JsonPointer.class).getJsonPointerString().getString();
-                JsonValue target = encodeId(plainId);
+                String plainTargetId;
+                JsonValue ref = propertySchema.get("$ref");
+                if (ref != null) {
+                    plainTargetId = ref.as(JsonPointer.class).getJsonPointerString().getString();
+                } else {
+                    plainTargetId = schemaRegisterId.asArray().add(key).as(JsonPointer.class).getJsonPointerString().getString();
+                }
+                JsonValue target = encodeId(plainTargetId);
                 mxCellOfObjectProperty = mxCellOfObjectProperty.put("target", target);
                 mxCellsBuilder = mxCellsBuilder.add(mxCellOfObjectProperty);
             }
@@ -142,10 +242,16 @@ public class Schema2DiagramTest {
     private JsonObject mxCellOfPrimitiveProperty(String propertyName, JsonValue schema) {
 
         JsonValue type = schema.get("type");
+        JsonValue ref = schema.get("$ref");
+        if (ref != null) {
+            return null;
+        }
+
         if (type.isString()) {
             if (Keywords.OBJECT.equals(type.getString()) || Keywords.ARRAY.equals(type.getString())) {
                 return null;
             }
+
         }
         if (type.isJsonArray()) {
             return null;
@@ -171,7 +277,7 @@ public class Schema2DiagramTest {
         return mxCell;
     }
 
-    public JsonObject mxCellOfObjectProperty(String propertyName, JsonValue schema){
+    public JsonObject mxCellOfObjectProperty(String propertyName, JsonValue schema) {
         JsonObject mxCell = JsonValueFactory.create("""
                 {
                     "mxGeometry": {

@@ -35,16 +35,18 @@ public class Properties {
             if (isRef || isObject || isArray) {
                 // This property is represented as an arrow to another swimlane
 
-                String arrowId = pathToSchema.as(JsonPointer.class).getJsonPointerString().getString() + "#" + propertyName.getString();
+                String arrowId = MxCell.createId(pathToSchema).getString() + "#" + propertyName.getString();
 
-                JsonValue target = isRef
-                        ? propertySchema.get("$ref").as(JsonPointer.class).getJsonPointerString()
-                        : pathToPropertySchema.as(JsonPointer.class).getJsonPointerString();
+                JsonPointer targetJsonPointer = isRef
+                        ? propertySchema.get("$ref").as(JsonPointer.class)
+                        : pathToPropertySchema.as(JsonPointer.class);
+
+                JsonValue targetId = MxCell.createId(targetJsonPointer.asArray());
 
                 propertiesBuilder.add(Templates.ARROW
                         .put("id", arrowId)
-                        .put("source", pathToSchema.as(JsonPointer.class).getJsonPointerString())
-                        .put("target", target)
+                        .put("source", MxCell.createId(pathToSchema))
+                        .put("target", targetId)
                         .put("value", propertyName)
                 );
 
@@ -58,8 +60,8 @@ public class Properties {
 
 
                 propertiesBuilder.add(Templates.SWIMLANE_ITEM_TEMPLATE
-                        .put("parent", pathToSchema.as(JsonPointer.class).getJsonPointerString())
-                        .put("id", pathToPropertySchema.as(JsonPointer.class).getJsonPointerString())
+                        .put("parent", MxCell.createId(pathToSchema))
+                        .put("id", MxCell.createId(pathToPropertySchema))
                         .put("value", propertyName.getString() + ": " + propertySchema.get("type", "").getString())
                         .put(JsonArray.of("mxGeometry", "y"), "" + (swimlaneItems++ * SWIMLANE_ITEM_HEIGHT + SWIMLANE_ITEM_HEIGHT))
                 );

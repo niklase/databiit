@@ -38,7 +38,7 @@ public class ObjectSchema {
                 mxCells.add(SWIMLANE
                         .put(JsonArray.of("mxGeometry", "height"), "" + (Properties.SWIMLANE_ITEM_HEIGHT + Properties.SWIMLANE_ITEM_HEIGHT * mxCellsWrapper.meta))
                         //.put(JsonArray.of("mxGeometry", "x"), "" + (pathToSchema.as(JsonPointer.class).getJsonPointerString().getString().length() * 10))
-                        .put("id", pathToSchema.as(JsonPointer.class).getJsonPointerString())
+                        .put("id", MxCell.createId(pathToSchema))
                         .put("value", schema.get("title", pathToSchema.isEmpty() ? JsonValue.of("ROOT") : pathToSchema.last())).jsonValue());
             }
             return mxCells.build();

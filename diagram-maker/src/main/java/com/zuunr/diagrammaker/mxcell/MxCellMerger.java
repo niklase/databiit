@@ -1,4 +1,4 @@
-package com.zuunr.diagrammaker;
+package com.zuunr.diagrammaker.mxcell;
 
 import com.zuunr.json.*;
 
@@ -6,37 +6,38 @@ import java.util.Comparator;
 
 public class MxCellMerger {
 
+
     private static JsonObjectMerger merger = new JsonObjectMerger();
 
     public static JsonArray merge(JsonArray mxCells, JsonArray autoMxCells) {
-        JsonObjectBuilder builder = JsonObject.EMPTY.builder();
+        JsonObjectBuilder autoMxCellsBuilder = JsonObject.EMPTY.builder();
 
         for (int i = 0; i < autoMxCells.size(); i++) {
             JsonObject autoMxCell = autoMxCells.get(i).getJsonObject();
-            builder.put(autoMxCell.get("id").getString(), autoMxCell);
+            autoMxCellsBuilder.put(autoMxCell.get("id").getString(), autoMxCell);
         }
-        return merge(mxCells, builder.build());
+        return merge(mxCells, autoMxCellsBuilder.build());
     }
 
-    public static JsonArray merge(JsonArray mxCells, JsonObject autoMxCellsById) {
+    private static JsonArray merge(JsonArray customMxCells, JsonObject autoMxCellsById) {
 
         JsonObject autoCellsLeft = autoMxCellsById;
         JsonArrayBuilder newMxCells = JsonArray.EMPTY.builder();
 
-        for (int i = 0; i < mxCells.size(); i++) {
-            JsonObject mxCell = mxCells.get(i).getJsonObject();
+        for (int i = 0; i < customMxCells.size(); i++) {
+            JsonObject mxCell = customMxCells.get(i).getJsonObject();
             String mxCellId = mxCell.get("id").getString();
             JsonObject autoCell = autoMxCellsById.get(mxCell.get("id").getString(), JsonValue.NULL).getJsonObject();
 
             if (autoCell == null) {
-                if (!mxCellId.startsWith("auto:")) {
+                if (!mxCellId.startsWith(Templates.PREFIX_OF_MANAGED_CELLS)) {
                     newMxCells.add(mxCell);
                 } else {
                     // do not add this one as it is auto-generated but does no longer exist
                 }
             } else {
                 autoCellsLeft = autoCellsLeft.remove(mxCellId);
-                if (mxCellId.startsWith("auto:")) {
+                if (mxCellId.startsWith(Templates.PREFIX_OF_MANAGED_CELLS)) {
                     newMxCells.add(forgeMxCells(mxCell, autoCell));
                 } else {
                     newMxCells.add(mxCell);
@@ -56,16 +57,22 @@ public class MxCellMerger {
         JsonObject forged = merger.merge(mxCellCustom, mxCellAuto)
                 //.put("style", mergedStyle)
                 ;
-
         // x/y position and height/weight should be customizable
-        JsonObjectBuilder mxGeometry = JsonObject.EMPTY.builder();
-        JsonObject customGeometry = mxCellCustom.get("mxGeometry", JsonValue.NULL).getJsonObject();
-        JsonValue width = customGeometry.get("width", mxCellAuto.get("width"));
-        JsonValue height = customGeometry.get("height", mxCellAuto.get("height"));
-        JsonValue x = customGeometry.get("x", mxCellAuto.get("x"));
-        JsonValue y = customGeometry.get("y", mxCellAuto.get("y"));
-        customGeometry.put("x", x).put("y",y).put("width", width).put("height", height);
-        return forged.put("mxGeometry", customGeometry);
+        JsonObject mxGeometryForged = mxCellAuto.get("mxGeometry", JsonValue.NULL).getJsonObject();
+
+
+        if (mxGeometryForged != null) {
+            JsonObject customGeometry = mxCellCustom.get("mxGeometry", JsonValue.NULL).getJsonObject();
+
+            JsonValue xCustom = customGeometry.get("x");
+            JsonValue yCustom = customGeometry.get("y");
+
+            mxGeometryForged = xCustom == null ? mxGeometryForged : mxGeometryForged.put("x", xCustom);
+            mxGeometryForged = yCustom == null ? mxGeometryForged : mxGeometryForged.put("y", yCustom);
+            forged = forged.put("mxGeometry", mxGeometryForged);
+
+        }
+        return forged;
     }
 
     private static JsonObject mergeMxCells(JsonObject mxCell1, JsonObject mxCell2) {

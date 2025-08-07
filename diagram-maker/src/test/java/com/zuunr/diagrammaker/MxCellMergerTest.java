@@ -2,6 +2,7 @@ package com.zuunr.diagrammaker;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.zuunr.diagrammaker.mxcell.MxCellMerger;
 import com.zuunr.json.JsonArray;
 import com.zuunr.json.JsonObject;
 import com.zuunr.json.JsonValue;

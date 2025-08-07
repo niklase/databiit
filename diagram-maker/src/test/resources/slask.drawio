@@ -6,45 +6,56 @@
             <root>
                 <mxCell id="0"/>
                 <mxCell parent="0" id="1" value="layer1"/>
-                <mxCell parent="/$defs/Address" id="/$defs/Address/properties/street"
+                <mxCell parent="auto:/$defs/Address" id="auto:/$defs/Address/properties/street"
                         style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;"
                         value="street: string" vertex="1">
                     <mxGeometry width="140" height="30" y="30" as="geometry"/>
                 </mxCell>
-                <mxCell parent="1" id="/$defs/Address"
+                <mxCell parent="1" id="auto:/$defs/Address"
                         style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;"
                         value="Address" vertex="1">
                     <mxGeometry width="140" height="60" x="90" y="430" as="geometry"/>
                 </mxCell>
-                <mxCell parent="/$defs/Person" id="/$defs/Person/properties/name"
+                <mxCell parent="1" id="auto:/$defs/Person#awayAddress" edge="1"
+                        style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=open;endFill=0;"
+                        value="awayAddress" source="auto:/$defs/Person" target="auto:/$defs/Address">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell parent="auto:/$defs/Person" id="auto:/$defs/Person/properties/name"
                         style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;"
                         value="name: string" vertex="1">
                     <mxGeometry width="140" height="30" y="30" as="geometry"/>
                 </mxCell>
-                <mxCell parent="1" id="/$defs/Person#homeAddress" edge="1"
+                <mxCell parent="1" id="auto:/$defs/Person#homeAddress" edge="1"
                         style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=open;endFill=0;"
-                        value="homeAddress" source="/$defs/Person" target="/$defs/Address">
+                        value="homeAddress" source="auto:/$defs/Person" target="auto:/$defs/Address">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell parent="1" id="/$defs/Person#pets" edge="1"
+                <mxCell parent="auto:/$defs/Person" id="auto:/$defs/Person/properties/nickName"
+                        style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;"
+                        value="nickName: string" vertex="1">
+                    <mxGeometry width="140" height="30" y="60" as="geometry"/>
+                </mxCell>
+                <mxCell parent="1" id="auto:/$defs/Person#pets" edge="1"
                         style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=open;endFill=0;"
-                        value="pets" source="/$defs/Person" target="/$defs/Person/properties/pets">
+                        value="pets" source="auto:/$defs/Person" target="auto:/$defs/Person/properties/pets">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell parent="/$defs/Person/properties/pets" id="/$defs/Person/properties/pets/properties/petName"
+                <mxCell parent="auto:/$defs/Person/properties/pets"
+                        id="auto:/$defs/Person/properties/pets/properties/petName"
                         style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;"
                         value="petName: string" vertex="1">
                     <mxGeometry width="140" height="30" y="30" as="geometry"/>
                 </mxCell>
-                <mxCell parent="1" id="/$defs/Person/properties/pets"
+                <mxCell parent="1" id="auto:/$defs/Person/properties/pets"
                         style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;"
                         value="[object]" vertex="1">
                     <mxGeometry width="140" height="60" x="90" y="430" as="geometry"/>
                 </mxCell>
-                <mxCell parent="1" id="/$defs/Person"
+                <mxCell parent="1" id="auto:/$defs/Person"
                         style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;"
                         value="Person" vertex="1">
-                    <mxGeometry width="140" height="60" x="90" y="430" as="geometry"/>
+                    <mxGeometry width="140" height="90" x="90" y="430" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>

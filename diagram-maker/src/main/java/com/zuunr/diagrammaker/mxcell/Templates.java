@@ -4,6 +4,9 @@ import com.zuunr.json.JsonObject;
 import com.zuunr.json.JsonValueFactory;
 
 public class Templates {
+
+    public static final String PREFIX_OF_MANAGED_CELLS = "auto:";
+
     public static final JsonObject ARROW = JsonObject.EMPTY
             .put("id", "ID")
             .put("value", "VALUE")

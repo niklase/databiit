@@ -28,7 +28,7 @@ steps:
       - 'gcloud'
       - 'run'
       - 'deploy'
-      - 'zip-download'
+      - 'drawio-server'
       - '--source'
       - '.'
       - '--platform'

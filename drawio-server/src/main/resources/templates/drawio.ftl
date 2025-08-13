@@ -4,7 +4,7 @@
   <title>Draw.io Embed</title>
 </head>
 <body>
-  <iframe id="drawioFrame" src="https://embed.diagrams.net/?embed=1&proto=json" width="100%" height="800"></iframe>
+  <iframe id="drawioFrame" src="https://embed.diagrams.net/?embed=1&proto=json&autosave=1" width="100%" height="800"></iframe>
 
   <script>
     const frame = document.getElementById('drawioFrame');
@@ -41,7 +41,12 @@
             }
 
             // Handle save events
-            if (data.event === 'save') {
+            if (data.event === 'autosave') {
+                console.log('Autosave event received');
+            }
+
+            // Handle save events
+            if (data.event === 'save' || data.event === 'autosave') {
                 console.log('Save event received');
                 await fetch('/save-diagram', {
                     method: 'POST',

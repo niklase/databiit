@@ -60,7 +60,6 @@ public class MxCellMerger {
         // x/y position and height/weight should be customizable
         JsonObject mxGeometryForged = mxCellAuto.get("mxGeometry", JsonValue.NULL).getJsonObject();
 
-
         if (mxGeometryForged != null) {
             JsonObject customGeometry = mxCellCustom.get("mxGeometry", JsonValue.NULL).getJsonObject();
 
@@ -69,6 +68,12 @@ public class MxCellMerger {
 
             mxGeometryForged = xCustom == null ? mxGeometryForged : mxGeometryForged.put("x", xCustom);
             mxGeometryForged = yCustom == null ? mxGeometryForged : mxGeometryForged.put("y", yCustom);
+            JsonValue customGeometryArray = customGeometry.get("Array");
+
+            if (customGeometryArray != null) {
+                mxGeometryForged = mxGeometryForged.put("Array", customGeometryArray);
+            }
+
             forged = forged.put("mxGeometry", mxGeometryForged);
 
         }

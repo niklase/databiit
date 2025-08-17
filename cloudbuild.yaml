@@ -8,7 +8,7 @@ steps:
       - 'package'
       - '-DskipTests'
       - '-pl'
-      - 'json-servlet-example'
+      - 'drawio-server'
       - '-am'
   - name: 'ubuntu'
     id: 'Prepare Deployment Directory'
@@ -17,8 +17,8 @@ steps:
       - '-c'
       - | 
         mkdir -p /workspace/deployment
-        cp -r json-servlet-example/* /workspace/deployment/
-        cp -r json-servlet-example/target/*.jar /workspace/deployment/
+        cp -r drawio-server/* /workspace/deployment/
+        cp -r drawio-server/target/*.jar /workspace/deployment/
 
   # Step 2: Automatically build and deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -28,7 +28,7 @@ steps:
       - 'gcloud'
       - 'run'
       - 'deploy'
-      - 'json-servlet-example'
+      - 'drawio-server'
       - '--source'
       - '.'
       - '--platform'

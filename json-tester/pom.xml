@@ -49,10 +49,7 @@
     <properties>
         <revision>SNAPSHOT</revision>
         <graalvm.version>22.2.0</graalvm.version>
-        <junit.version>5.10.3</junit.version>
-        <junit.platform.version>1.10.3</junit.platform.version>
     </properties>
-
     <build>
         <plugins>
             <plugin>
@@ -69,7 +66,6 @@
             </plugin>
         </plugins>
     </build>
-
     <dependencies>
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -82,23 +78,19 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.version}</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit.version}</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
-            <version>${junit.version}</version>
         </dependency>
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-launcher</artifactId>
             <scope>test</scope>
-            <version>${junit.platform.version}</version>
         </dependency>
     </dependencies>
 </project>

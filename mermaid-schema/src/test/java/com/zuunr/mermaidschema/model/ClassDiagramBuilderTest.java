@@ -1,11 +1,8 @@
 package com.zuunr.mermaidschema.model;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.zuunr.json.JsonArray;
 import com.zuunr.json.JsonObject;
 import com.zuunr.json.JsonValueFactory;
 import com.zuunr.mermaidschema.ClassDiagramBuilder;
-import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -15,41 +12,41 @@ public class ClassDiagramBuilderTest {
 
 
     String json = """
-                {
+            {
+              "properties": {
+                "car": { 
+                  "$ref": "/$defs/Car" 
+                },
+                "name": { "type": "string" },
+                "age": { "type": "integer" },
+                "address": {
+                  "type": "object",
                   "properties": {
-                    "car": { 
-                      "$ref": "/$defs/Car" 
+                    "street": { "type": "string" },
+                    "cars": {
+                      "$ref": "/$defs/Car"
                     },
-                    "name": { "type": "string" },
-                    "age": { "type": "integer" },
-                    "address": {
-                      "type": "object",
-                      "properties": {
-                        "street": { "type": "string" },
-                        "cars": {
-                          "$ref": "/$defs/Car"
-                        },
-                        "residents" : {
-                            "type": "object",
-                            "properties": {
-                                "number": {
-                                    "type": "integer"
-                                }
+                    "residents" : {
+                        "type": "object",
+                        "properties": {
+                            "number": {
+                                "type": "integer"
                             }
                         }
-                      }
-                    }
-                  },
-                  "$defs": {
-                    "Car": {
-                      "type": "object",
-                      "properties": {
-                        "brand": { "type": "string"}
-                      }
                     }
                   }
                 }
-                """;
+              },
+              "$defs": {
+                "Car": {
+                  "type": "object",
+                  "properties": {
+                    "brand": { "type": "string"}
+                  }
+                }
+              }
+            }
+            """;
 
     String expected = """
             classDiagram
@@ -77,13 +74,13 @@ public class ClassDiagramBuilderTest {
     @Test
     void test() {
         ClassDiagramBuilder classDiagramBuilder = new ClassDiagramBuilder();
-        PatternTemplate[] patternTemplates =  {
+        PatternTemplate[] patternTemplates = {
                 PatternTemplate.create("(.+)", "$1"),
                 PatternTemplate.create("", "Root"),
         };
         ClassNamer classNamer = new ClassNamer(patternTemplates, JsonObject.EMPTY.put("$", "_").put("/", "_"));
         String result = classDiagramBuilder.create(JsonValueFactory.create(json), classNamer);
-        System.out.print(result.replaceAll("\"", "").replaceAll(",","").replaceAll("[\\[]",""));
+        System.out.print(result.replaceAll("\"", "").replaceAll(",", "").replaceAll("[\\[]", ""));
         assertEquals(expected, result);
     }
 

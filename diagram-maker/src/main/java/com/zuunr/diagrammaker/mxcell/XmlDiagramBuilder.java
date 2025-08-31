@@ -40,6 +40,5 @@ public class XmlDiagramBuilder {
                 """)
                 .append(xml)
                 .append("</diagram></mxfile>").toString();
-
     }
 }

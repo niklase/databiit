@@ -1,4 +1,4 @@
-package com.zuunr.diagrammaker;
+package com.zuunr.diagrammaker.mxcell;
 
 import com.zuunr.json.*;
 import com.zuunr.json.merge.MergeStrategy;
@@ -12,30 +12,34 @@ public class StyleMerger {
         css1 = css1 == null ? JsonValue.EMPTY_STRING : css1;
         css2 = css2 == null ? JsonValue.EMPTY_STRING : css2;
 
-        JsonObject css1JsonValue = cssAsJsonObject(css1.getString());
-        JsonObject css2JsonValue = cssAsJsonObject(css2.getString());
+        JsonObject css1JsonValue = styleAsJsonObject(css1.getString());
+        JsonObject css2JsonValue = styleAsJsonObject(css2.getString());
         JsonObject mergedCss = merger.merge(css1JsonValue, css2JsonValue);
 
+        return JsonValue.of(styleObjectAsString(mergedCss));
+    }
+
+    public static final String styleObjectAsString(JsonObject styleObject) {
         StringBuilder mergedStyle = new StringBuilder();
-        JsonArray sortedKeys = mergedCss.keys().sort();
+        JsonArray sortedKeys = styleObject.keys().sort();
         for (JsonValue key : sortedKeys) {
-            JsonValue value = mergedCss.get(key.getString());
+            JsonValue value = styleObject.get(key.getString());
             mergedStyle.append(key.getString());
             if (!value.isNull()) {
-                mergedStyle.append("=").append(mergedCss.get(key.getString()).getString());
+                mergedStyle.append("=").append(styleObject.get(key.getString()).getString());
             }
             mergedStyle.append(";");
         }
-        return JsonValue.of(mergedStyle.toString());
+        return mergedStyle.toString();
     }
 
-    private static JsonObject cssAsJsonObject(String css) {
+    public static JsonObject styleAsJsonObject(String styleString) {
 
-        if (css.isEmpty()) {
+        if (styleString.isEmpty()) {
             return JsonObject.EMPTY;
         }
         JsonObjectBuilder builder = JsonObject.EMPTY.builder();
-        String[] semiSplit = css.split(";");
+        String[] semiSplit = styleString.split(";");
 
         for (String s : semiSplit) {
             int index = s.indexOf("=");

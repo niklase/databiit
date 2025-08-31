@@ -1,5 +1,6 @@
 package com.zuunr.diagrammaker;
 
+import com.zuunr.diagrammaker.mxcell.StyleMerger;
 import com.zuunr.json.JsonValue;
 import org.junit.jupiter.api.Test;
 

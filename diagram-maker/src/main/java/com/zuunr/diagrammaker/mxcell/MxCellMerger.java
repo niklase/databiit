@@ -54,6 +54,10 @@ public class MxCellMerger {
 
     private static JsonObject forgeMxCells(JsonObject mxCellCustom, JsonObject mxCellAuto) {
         //JsonValue mergedStyle = StyleMerger.merge(mxCell1.get("style"), mxCell2.get("style"));
+
+        String parentOfMxCellAuto = mxCellAuto.get("parent", JsonValue.EMPTY_STRING).getString();
+        boolean isAutoSwimlaneItem = parentOfMxCellAuto.startsWith(Templates.PREFIX_OF_MANAGED_CELLS);
+
         JsonObject forged = merger.merge(mxCellCustom, mxCellAuto)
                 //.put("style", mergedStyle)
                 ;
@@ -66,8 +70,10 @@ public class MxCellMerger {
             JsonValue xCustom = customGeometry.get("x");
             JsonValue yCustom = customGeometry.get("y");
 
-            mxGeometryForged = xCustom == null ? mxGeometryForged : mxGeometryForged.put("x", xCustom);
-            mxGeometryForged = yCustom == null ? mxGeometryForged : mxGeometryForged.put("y", yCustom);
+            if (!isAutoSwimlaneItem) {
+                mxGeometryForged = xCustom == null ? mxGeometryForged : mxGeometryForged.put("x", xCustom);
+                mxGeometryForged = yCustom == null ? mxGeometryForged : mxGeometryForged.put("y", yCustom);
+            }
             JsonValue customGeometryArray = customGeometry.get("Array");
 
             if (customGeometryArray != null) {

@@ -6,15 +6,13 @@ import com.zuunr.diagrammaker.JsonXmlSerializer;
 import com.zuunr.diagrammaker.mxcell.MxCellMerger;
 import com.zuunr.diagrammaker.mxcell.XmlDiagramBuilder;
 import com.zuunr.json.JsonArray;
+import com.zuunr.json.JsonObject;
 import com.zuunr.json.JsonValue;
 import com.zuunr.json.JsonValueFactory;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
@@ -214,5 +212,28 @@ public class DrawioController {
         // Respond with success
         response.setStatus(HttpServletResponse.SC_OK);
         response.getWriter().write("Diagram saved successfully!");
+    }
+
+    @PutMapping("/schema")
+
+    public void saveSchema(@RequestBody String schemaString, HttpServletResponse response) throws IOException {
+        // Log the diagram XML (In a real app, persist it to a database or file system)
+
+
+        JsonObject schema = JsonValueFactory.create(schemaString).getJsonObject();
+        String dbId = "id-1";
+
+        database.putItem(database.readItem(dbId).put("schema", schema.jsonValue()));
+
+        // Respond with success
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.getWriter().write(schema.asJson());
+    }
+
+    @GetMapping("/schema")
+    @ResponseBody
+    public String getSchema() {
+        String dbId = "id-1";
+        return database.readItem(dbId).get("schema", JsonObject.EMPTY).asJson();
     }
 }

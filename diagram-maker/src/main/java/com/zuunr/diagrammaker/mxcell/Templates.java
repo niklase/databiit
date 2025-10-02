@@ -34,4 +34,20 @@ public class Templates {
                 "vertex": "1"
             }
             """).getJsonObject();
+
+    public static JsonObject MULTIPLICITY =
+            JsonObject.EMPTY
+                    .put("id", "ID")
+                    .put("value", "VALUE")
+                    .put("style", "edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];")
+                    .put("vertex", "1")
+                    .put("connectable", "0")
+                    .put("parent", "PARENT")
+                    .put("mxGeometry", JsonObject.EMPTY
+                            .put("x", "0.8439")
+                            .put("y", "3")
+                            .put("relative", "1")
+                            .put("as", "geometry")
+                            .put("mxPoint", JsonObject.EMPTY
+                                    .put("as", "offset")));
 }

@@ -1,10 +1,8 @@
 package com.zuunr.diagrammaker.mxcell;
 
-import com.zuunr.json.JsonArray;
-import com.zuunr.json.JsonArrayBuilder;
-import com.zuunr.json.JsonObject;
-import com.zuunr.json.JsonValue;
+import com.zuunr.json.*;
 import com.zuunr.json.pointer.JsonPointer;
+import com.zuunr.json.schema.Keywords;
 
 public class Properties {
 
@@ -28,18 +26,18 @@ public class Properties {
             JsonArray pathToPropertySchema = pathToSchema.add("properties").add(propertyName);
             JsonValue propertySchema = propertySchemas.get(i);
 
-            boolean isRef = propertySchema.get("$ref") != null;
-            boolean isObject = "object".equals(propertySchema.get("type", JsonValue.NULL).getString());
-            boolean isArray = "array".equals(propertySchema.get("type", JsonValue.NULL).getString());
+            // The following will only handle inline schemas of type array. Improve by following $ref
+            boolean isInlineArray = Keywords.ARRAY.equals(propertySchema.get(Keywords.TYPE, JsonValue.NULL).getString());
 
-            if (isRef || isObject || isArray) {
+            JsonPointer targetJsonPointer = getTargetJsonPointer(propertySchema, pathToPropertySchema, rootDoc);
+
+            if (targetJsonPointer != null) { // There is an object somewhere in the hierarchy of $refs
                 // This property is represented as an arrow to another swimlane
 
-                String arrowId = MxCell.createId(pathToSchema).getString() + "#" + propertyName.getString();
+                JsonValue targetSchema = rootDoc.get(targetJsonPointer);
+                boolean isObjectAtLevelOfAnyDepth = Keywords.OBJECT.equals(targetSchema.get(Keywords.TYPE, "").getString());
 
-                JsonPointer targetJsonPointer = isRef
-                        ? propertySchema.get("$ref").as(JsonPointer.class)
-                        : pathToPropertySchema.as(JsonPointer.class);
+                String arrowId = MxCell.createId(pathToSchema).getString() + "#" + propertyName.getString();
 
                 JsonValue targetId = MxCell.createId(targetJsonPointer.asArray());
 
@@ -50,28 +48,74 @@ public class Properties {
                         .put("value", propertyName)
                 );
 
-                if (isObject || isArray) {
-                    propertiesBuilder.addAll(Schema.mxCellsOf(propertySchemas.get(i).getJsonObject().put("title", isObject ? "[object]" : "[array]").jsonValue(), rootDoc, pathToPropertySchema));
+
+                JsonObject multiplicityMxCell = Templates.MULTIPLICITY
+                        .put("id", arrowId + "#multiplicity")
+                        .put("parent", arrowId);
+
+                if (isInlineArray) {
+                    propertiesBuilder.addAll(
+                            Schema.mxCellsOf(rootDoc.get(pathToPropertySchema).getJsonObject().put("title", "[array]").jsonValue(), rootDoc, JsonArray.EMPTY));
+
+                    String minItems = "" + propertySchema.get(Keywords.MIN_ITEMS, 0);
+                    JsonNumber maxItems = propertySchema.get(Keywords.MAX_ITEMS, -1).getJsonNumber();
+                    String multiplicity = minItems + ".." + (JsonValue.MINUS_ONE.equals(maxItems.jsonValue()) ? "*" : maxItems);
+
+                    propertiesBuilder.add(multiplicityMxCell.put("value", multiplicity));
+                } else if (isObjectAtLevelOfAnyDepth) {
+                    propertiesBuilder.addAll(Schema.mxCellsOf(propertySchemas.get(i).getJsonObject().put("title", "[object]").jsonValue(), rootDoc, pathToPropertySchema));
+                    String multiplicity = schema.get(Keywords.REQUIRED, JsonArray.EMPTY).getJsonArray().contains(propertyName) ? "1" : "0..1";
+                    propertiesBuilder.add(multiplicityMxCell.put("value", multiplicity));
                 }
-            } else if (propertySchema.get("type") == null || propertySchema.get("type").isString()
-                    && !"object".equals(propertySchema.get("type").getString())
-                    && !"array".equals(propertySchema.get("type").getString())) {
-                // This property schema should be inlined
-
-
+            } else {
+                String leafType = getLeafType(propertySchema, pathToPropertySchema, new StringBuilder());
                 propertiesBuilder.add(Templates.SWIMLANE_ITEM_TEMPLATE
                         .put("parent", MxCell.createId(pathToSchema))
                         .put("id", MxCell.createId(pathToPropertySchema))
-                        .put("value", propertyName.getString() + ": " + propertySchema.get("type", "").getString())
+                        .put("value", propertyName.getString() + ": " + (leafType == null ? "?" : leafType))
                         .put(JsonArray.of("mxGeometry", "y"), "" + (swimlaneItems++ * SWIMLANE_ITEM_HEIGHT + SWIMLANE_ITEM_HEIGHT))
                 );
-            } else {
-                throw new RuntimeException("Unsupported property type: " + propertySchema.get("type", JsonValue.NULL).getString());
             }
 
         }
         return new MxCellsWrapper<>(propertiesBuilder.build(), swimlaneItems);
+    }
+
+    private static JsonPointer getTargetJsonPointer(JsonValue schema, JsonArray pathToSchema, JsonValue rootDoc) {
+
+        boolean isRef = schema.get("$ref") != null;
+        boolean isObject = "object".equals(schema.get("type", JsonValue.NULL).getString());
+        boolean isArray = "array".equals(schema.get("type", JsonValue.NULL).getString());
+
+        if (isRef) {
+            JsonPointer refJsonPointer = schema.get("$ref").as(JsonPointer.class);
+            return getTargetJsonPointer(rootDoc.get(refJsonPointer), refJsonPointer.asArray(), rootDoc);
+        } else if (isObject) {
+            return pathToSchema.as(JsonPointer.class);
+        } else if (isArray) {
+            if (schema.get(Keywords.ITEMS) != null) {
+                return getTargetJsonPointer(schema.get(Keywords.ITEMS), pathToSchema.add(Keywords.ITEMS), rootDoc);
+            }
+        } else {  // Is a leaf
+            return null;
+        }
+        return null;
 
     }
 
+    private static String getLeafType(JsonValue schema, JsonArray pathToSchema, StringBuilder result) {
+
+        boolean isArray = "array".equals(schema.get("type", JsonValue.NULL).getString());
+
+        if (isArray) {
+            JsonValue itemsSchema = schema.get(Keywords.ITEMS);
+            if (itemsSchema != null){
+                return itemsSchema.get(Keywords.TYPE).getString()+"[]";
+            } else {
+                return "?[]";
+            }
+        } else {  // Is a leaf
+            return schema.get("type", "?").getString();
+        }
+    }
 }

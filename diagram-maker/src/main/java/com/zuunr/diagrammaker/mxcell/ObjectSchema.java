@@ -1,11 +1,11 @@
 package com.zuunr.diagrammaker.mxcell;
 
 import com.zuunr.json.*;
-import com.zuunr.json.pointer.JsonPointer;
+import com.zuunr.json.schema.Keywords;
 
 public class ObjectSchema {
 
-    private static JsonValue OBJECT = JsonValue.of("object");
+    private static JsonValue OBJECT = JsonValue.of(Keywords.OBJECT);
     private static JsonObject SWIMLANE = JsonValueFactory.create("""
             {
               "mxGeometry": {
@@ -28,18 +28,19 @@ public class ObjectSchema {
 
         JsonValue type = schema.get("type");
 
-        if (type == null || OBJECT.equals(type) || type.isJsonArray() && type.getJsonArray().contains(OBJECT)) {
+        if (type == null || isObjectType(type)) {
             JsonArrayBuilder mxCells = JsonArray.EMPTY.builder();
 
             MxCellsWrapper<Integer> mxCellsWrapper = Properties.mxCellsOf(schema, rootDoc, pathToSchema);
             mxCells.addAll(mxCellsWrapper.mxCells);
 
-            if (!pathToSchema.isEmpty() && mxCellsWrapper.meta > 0) {
+            if (!pathToSchema.isEmpty() && isObjectType(type)) {
+                JsonValue title = schema.get("title", pathToSchema.isEmpty() ? JsonValue.of("ROOT") : pathToSchema.last());
                 mxCells.add(SWIMLANE
                         .put(JsonArray.of("mxGeometry", "height"), "" + (Properties.SWIMLANE_ITEM_HEIGHT + Properties.SWIMLANE_ITEM_HEIGHT * mxCellsWrapper.meta))
-                        //.put(JsonArray.of("mxGeometry", "x"), "" + (pathToSchema.as(JsonPointer.class).getJsonPointerString().getString().length() * 10))
                         .put("id", MxCell.createId(pathToSchema))
-                        .put("value", schema.get("title", pathToSchema.isEmpty() ? JsonValue.of("ROOT") : pathToSchema.last())).jsonValue());
+                        .put("value", title).jsonValue());
+
             }
             return mxCells.build();
         }
@@ -47,4 +48,7 @@ public class ObjectSchema {
     }
 
 
+    private static boolean isObjectType(JsonValue typeValue) {
+        return OBJECT.equals(typeValue) || typeValue != null && typeValue.isJsonArray() && typeValue.getJsonArray().contains(OBJECT);
+    }
 }

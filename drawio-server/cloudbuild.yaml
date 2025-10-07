@@ -36,6 +36,7 @@ steps:
       - '--region'
       - 'europe-west1'
       - '--allow-unauthenticated'
-      - '--update-secrets MONGODB_URI=projects/databiit/secrets/dryagram-mongodb-uri:latest'
+      - '--update-secrets'
+      - 'MONGODB_URI=projects/databiit/secrets/dryagram-mongodb-uri:latest'
 options:
   logging: CLOUD_LOGGING_ONLY

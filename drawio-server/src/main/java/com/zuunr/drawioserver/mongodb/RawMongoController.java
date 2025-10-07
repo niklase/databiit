@@ -1,5 +1,8 @@
 package com.zuunr.drawioserver.mongodb;
 
+import com.zuunr.json.JsonArray;
+import com.zuunr.json.JsonObject;
+import com.zuunr.json.JsonValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -7,35 +10,18 @@ import java.util.List;
 import org.bson.Document;
 
 @RestController
-@RequestMapping("/api/raw")
+@RequestMapping("/mongodb")
 public class RawMongoController {
 
-    @Autowired
-    private RawMongoService rawMongoService;
+    @Autowired RawMongoDB rawMongoDB;
 
-    @PostMapping("/insert/{collectionName}")
-    public String insertRawDocument(@PathVariable String collectionName, @RequestBody String jsonString) {
-        rawMongoService.insertRawDocument(collectionName, jsonString);
-        return "Document inserted!";
-    }
-
-    @GetMapping("/find/{collectionName}")
-    public List<Document> getAllDocuments(@PathVariable String collectionName) {
-        return rawMongoService.getAllDocuments(collectionName);
-    }
-
-    @PostMapping("/find/{collectionName}")
-    public List<Document> findDocumentsWithFilter(
-            @PathVariable String collectionName,
-            @RequestBody String filterJson) {
-        return rawMongoService.findDocumentsWithFilter(collectionName, filterJson);
-    }
-
-    @DeleteMapping("/delete/{collectionName}")
-    public String deleteDocumentsWithFilter(
-            @PathVariable String collectionName,
-            @RequestBody String filterJson) {
-        rawMongoService.deleteDocumentsWithFilter(collectionName, filterJson);
-        return "Documents deleted!";
+    @GetMapping(value = "/test", produces = "application/json")
+    public JsonValue insertRawDocument() {
+        return rawMongoDB.runCommand(JsonObject.EMPTY
+                .put("insert", JsonObject.EMPTY
+                        .put("insert", "persons")
+                        .put("documents", JsonArray.of(JsonObject.EMPTY
+                                .put("name", "Peter Andersson")
+                                .put("secretId", "sercretid..."))))).jsonValue();
     }
 }

@@ -80,20 +80,13 @@ public class JsonXmlSerializer {
 
         for (int i = 0; i < strVal.length(); i++) {
             char current = strVal.charAt(i);
-            if (current == '\n') {
-                escapedValueBuilder.append("\\n");
-            } else if (current == '\r') {
-                escapedValueBuilder.append("\\r");
-            } else if (current == '\f') {
-                escapedValueBuilder.append("\\f");
-            } else if (current == '\b') {
-                escapedValueBuilder.append("\\b");
-            } else if (current == '\t') {
-                escapedValueBuilder.append("\\t");
-            } else if (current == '\"') {
-                escapedValueBuilder.append("\\\"");
-            } else if (current == '\\') {
-                escapedValueBuilder.append("\\\\");
+
+            if (current == '&') {
+                escapedValueBuilder.append("&amp;");
+            } else if (current == '<') {
+                escapedValueBuilder.append("&lt;");
+            } else if (current == '>') {
+                escapedValueBuilder.append("&gt;");
             } else {
                 escapedValueBuilder.append(current);
             }

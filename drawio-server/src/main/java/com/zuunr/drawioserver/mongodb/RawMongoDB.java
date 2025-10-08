@@ -7,6 +7,7 @@ import com.zuunr.json.JsonObject;
 import com.zuunr.json.util.JsonObjectWrapper;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,6 +17,9 @@ public class RawMongoDB {
 
     @Autowired
     private MongoClient mongoClient;
+
+    @Autowired
+    MongoTemplate mongoTemplate;
 
     private CreateCommandTranslator create = new CreateCommandTranslator();
     private CreateIndexesCommandTranslator createIndexes = new CreateIndexesCommandTranslator();
@@ -33,7 +37,7 @@ public class RawMongoDB {
 
 
     public JsonObject runCommand(JsonObject command) {
-        MongoDatabase mongoDatabase = mongoClient.getDatabase("drawio");
+        MongoDatabase mongoDatabase = mongoTemplate.getMongoDatabaseFactory().getMongoDatabase("dryagram");
         Document bsonCommand = translate(command);
         return runCommand(bsonCommand, mongoDatabase);
     }

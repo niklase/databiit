@@ -1,4 +1,4 @@
 spring:
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://admin:adminpassword@localhost:27017/drawio-server-db?authSource=admin}
+      uri: ${MONGODB_URI:mongodb://admin:adminpassword@localhost:27017/dryagram?authSource=admin}

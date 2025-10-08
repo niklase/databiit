@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.zuunr.json.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.FreeMarkerConfigurerBeanDefinitionParser;
@@ -41,10 +42,13 @@ public class Config {
         return resolver;
     }
 
+    @Value("${spring.data.mongodb.uri}")
+    private String mongoUri; // Automatically loads the URI from application.yml
+
     @Bean
     public MongoClient mongoClient() {
-        // Replace "mongodb://localhost:27017" with your MongoDB connection string
-        return MongoClients.create("mongodb://admin:adminpassword@localhost:27017/drawio-server-db?authSource=admin");
+        // Create and return the MongoClient instance using the URI
+        return MongoClients.create(mongoUri);
     }
 
     @Bean

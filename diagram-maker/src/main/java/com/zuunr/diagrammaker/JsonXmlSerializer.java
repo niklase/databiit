@@ -20,7 +20,13 @@ public class JsonXmlSerializer {
         ArrayList<Map.Entry<String, JsonValue>> nestedXml = new ArrayList<>();
         for (Map.Entry<String, JsonValue> entry : jsonObject.asMap().entrySet()) {
             if (entry.getValue().isString()) {
-                xml.append(" ").append(entry.getKey()).append("=").append(entry.getValue());
+                String key = entry.getKey();
+                JsonValue value = entry.getValue();
+                String escapedValue = escapeString(value.isString() ? value.getString() : value.getValue().toString());
+                xml.append(" ").append(key).append("=")
+                        .append("\"")
+                        .append(escapedValue)
+                        .append("\"");
             } else {
                 nestedXml.add(entry);
             }
@@ -33,12 +39,7 @@ public class JsonXmlSerializer {
 
             for (int i = 0; i < nestedXml.size(); i++) {
                 Map.Entry<String, JsonValue> entry = nestedXml.get(i);
-                if (entry.getValue().isJsonObject()) {
-                    //xml.append("<").append(entry.getKey()).append(">").append(serialize(pathToHere.add(entry.getKey()), entry.getValue())).append("</" + entry.getKey() + ">");
-                    xml.append(serialize(pathToHere.add(entry.getKey()), entry.getValue()));
-                } else {
-                    xml.append(serialize(pathToHere.add(entry.getKey()), entry.getValue()));
-                }
+                xml.append(serialize(pathToHere.add(entry.getKey()), entry.getValue()));
             }
 
             xml.append("</").append(elementName).append(">");
@@ -87,6 +88,8 @@ public class JsonXmlSerializer {
                 escapedValueBuilder.append("&lt;");
             } else if (current == '>') {
                 escapedValueBuilder.append("&gt;");
+            } else if (current == '\"') {
+                escapedValueBuilder.append("&quot;");
             } else {
                 escapedValueBuilder.append(current);
             }
